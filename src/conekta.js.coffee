@@ -1,4 +1,4 @@
-base_url = 'https://api.conekta.io/'
+base_url = 'https://api.conekta.io'
 publishable_key = null
 session_id = ""
 
@@ -168,6 +168,53 @@ window.Conekta =
     publishable_key
 
   _helpers:
+    parseForm:(charge_form)->
+      charge = {}
+      if typeof charge_form == 'object'
+        if typeof jQuery != 'undefined' and charge_form instanceof jQuery
+          charge_form = charge_form.get()[0]
+
+        if charge_form.nodeType
+          textareas = charge_form.getElementsByTagName('textarea')
+          inputs = charge_form.getElementsByTagName('input')
+          all_inputs = new Array(textareas.length + inputs.length)
+
+          for i in [0..textareas.length-1] by 1
+            all_inputs[i] = textareas[i]
+
+          for i in [0..inputs.length-1] by 1
+            all_inputs[i+textareas.length] = inputs[i]
+
+          for input in all_inputs
+            if input
+              attribute_name = input.getAttribute('data-conekta')
+              if attribute_name
+                val = input.getAttribute('value') || input.innerHTML || input.value 
+                attributes = attribute_name.replace(/\]/g, '').replace(/\-/g,'_').split(/\[/)
+
+                parent_node = null
+                node = charge
+                last_attribute = null
+                for attribute in attributes
+                  if ! node[attribute]
+                    node[attribute] = {}
+
+                  parent_node = node
+                  last_attribute = attribute
+                  node = node[attribute]
+
+                parent_node[last_attribute] = val
+        else
+          charge = charge_form
+
+        if charge.details && charge.details.line_items && Object.prototype.toString.call( charge.details.line_items ) != '[object Array]' && typeof charge.details.line_items == 'object'
+          line_items = []
+          for key of charge.details.line_items
+            line_items.push(charge.details.line_items[key])
+          charge.details.line_items = line_items
+
+      charge
+
     getSessionId:()->
       session_id
 
@@ -191,9 +238,10 @@ window.Conekta =
 
       if document.location.protocol == 'file:'
         params.url = (params.jsonp_url || params.url) + '.js'
-        params.data['_Version'] = "0.2.0"
+        params.data['_Version'] = "0.3.0"
         params.data['_RaiseHtmlError'] = false
         params.data['auth_token'] = Conekta.getPublishableKey()
+        params.data['conekta_client_user_agent'] = '{"agent":"Conekta JavascriptBindings/0.3.0"}'
 
         ajax(
           url: base_url + params.url
@@ -212,14 +260,15 @@ window.Conekta =
             contentType:'application/json'
             headers:
               'RaiseHtmlError': false
-              'Accept': 'application/vnd.conekta-v0.2.0+json'
+              'Accept': 'application/vnd.conekta-v0.3.0+json'
+              'Conekta-Client-User-Agent':'{"agent":"Conekta JavascriptBindings/0.3.0"}'
               'Authorization':'Basic ' + Base64.encode(Conekta.getPublishableKey() + ':')
             success: success_callback
             error:error_callback
           )
         else
           rpc = new easyXDM.Rpc({
-            swf:"https://conektaapi.s3.amazonaws.com/v0.2.0/flash/easyxdm.swf"
+            swf:"https://conektaapi.s3.amazonaws.com/v0.3.0/flash/easyxdm.swf"
             remote: base_url + "easyxdm_cors_proxy.html"
           },{
             remote:{
@@ -231,7 +280,8 @@ window.Conekta =
             method:'POST'
             headers:
               'RaiseHtmlError': false
-              'Accept': 'application/vnd.conekta-v0.2.0+json'
+              'Accept': 'application/vnd.conekta-v0.3.0+json'
+              'Conekta-Client-User-Agent':'{"agent":"Conekta JavascriptBindings/0.3.0"}'
               'Authorization':'Basic ' + Base64.encode(Conekta.getPublishableKey() + ':')
             data:JSON.stringify(params.data)
           }, success_callback, error_callback)

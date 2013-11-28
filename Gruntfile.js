@@ -8,7 +8,7 @@ module.exports = function(grunt){
     coffee: {
       compile: {
           files: {
-            'dist/conekta_no_dependencies.js': ['src/conekta.js.coffee', 'src/charge.js.coffee', 'src/card.js.coffee']
+            'dist/conekta_no_dependencies.js': ['src/conekta.js.coffee', 'src/charge.js.coffee', 'src/card.js.coffee', 'src/token.js.coffee']
           }
         }
     },

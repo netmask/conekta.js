@@ -38,7 +38,7 @@
 (function() {
   var Base64, base_url, fingerprint, i, publishable_key, session_id, useable_characters, _i;
 
-  base_url = 'https://api.conekta.io/';
+  base_url = 'https://api.conekta.io';
 
   publishable_key = null;
 
@@ -216,6 +216,59 @@
       return publishable_key;
     },
     _helpers: {
+      parseForm: function(charge_form) {
+        var all_inputs, attribute, attribute_name, attributes, charge, input, inputs, key, last_attribute, line_items, node, parent_node, textareas, val, _j, _k, _l, _len, _len1, _m, _ref, _ref1;
+        charge = {};
+        if (typeof charge_form === 'object') {
+          if (typeof jQuery !== 'undefined' && charge_form instanceof jQuery) {
+            charge_form = charge_form.get()[0];
+          }
+          if (charge_form.nodeType) {
+            textareas = charge_form.getElementsByTagName('textarea');
+            inputs = charge_form.getElementsByTagName('input');
+            all_inputs = new Array(textareas.length + inputs.length);
+            for (i = _j = 0, _ref = textareas.length - 1; _j <= _ref; i = _j += 1) {
+              all_inputs[i] = textareas[i];
+            }
+            for (i = _k = 0, _ref1 = inputs.length - 1; _k <= _ref1; i = _k += 1) {
+              all_inputs[i + textareas.length] = inputs[i];
+            }
+            for (_l = 0, _len = all_inputs.length; _l < _len; _l++) {
+              input = all_inputs[_l];
+              if (input) {
+                attribute_name = input.getAttribute('data-conekta');
+                if (attribute_name) {
+                  val = input.getAttribute('value') || input.innerHTML || input.value;
+                  attributes = attribute_name.replace(/\]/g, '').replace(/\-/g, '_').split(/\[/);
+                  parent_node = null;
+                  node = charge;
+                  last_attribute = null;
+                  for (_m = 0, _len1 = attributes.length; _m < _len1; _m++) {
+                    attribute = attributes[_m];
+                    if (!node[attribute]) {
+                      node[attribute] = {};
+                    }
+                    parent_node = node;
+                    last_attribute = attribute;
+                    node = node[attribute];
+                  }
+                  parent_node[last_attribute] = val;
+                }
+              }
+            }
+          } else {
+            charge = charge_form;
+          }
+          if (charge.details && charge.details.line_items && Object.prototype.toString.call(charge.details.line_items) !== '[object Array]' && typeof charge.details.line_items === 'object') {
+            line_items = [];
+            for (key in charge.details.line_items) {
+              line_items.push(charge.details.line_items[key]);
+            }
+            charge.details.line_items = line_items;
+          }
+        }
+        return charge;
+      },
       getSessionId: function() {
         return session_id;
       },
@@ -241,9 +294,10 @@
         };
         if (document.location.protocol === 'file:') {
           params.url = (params.jsonp_url || params.url) + '.js';
-          params.data['_Version'] = "0.2.0";
+          params.data['_Version'] = "0.3.0";
           params.data['_RaiseHtmlError'] = false;
           params.data['auth_token'] = Conekta.getPublishableKey();
+          params.data['conekta_client_user_agent'] = '{"agent":"Conekta JavascriptBindings/0.3.0"}';
           return ajax({
             url: base_url + params.url,
             dataType: 'jsonp',
@@ -261,7 +315,8 @@
               contentType: 'application/json',
               headers: {
                 'RaiseHtmlError': false,
-                'Accept': 'application/vnd.conekta-v0.2.0+json',
+                'Accept': 'application/vnd.conekta-v0.3.0+json',
+                'Conekta-Client-User-Agent': '{"agent":"Conekta JavascriptBindings/0.3.0"}',
                 'Authorization': 'Basic ' + Base64.encode(Conekta.getPublishableKey() + ':')
               },
               success: success_callback,
@@ -269,7 +324,7 @@
             });
           } else {
             rpc = new easyXDM.Rpc({
-              swf: "https://conektaapi.s3.amazonaws.com/v0.2.0/flash/easyxdm.swf",
+              swf: "https://conektaapi.s3.amazonaws.com/v0.3.0/flash/easyxdm.swf",
               remote: base_url + "easyxdm_cors_proxy.html"
             }, {
               remote: {
@@ -281,7 +336,8 @@
               method: 'POST',
               headers: {
                 'RaiseHtmlError': false,
-                'Accept': 'application/vnd.conekta-v0.2.0+json',
+                'Accept': 'application/vnd.conekta-v0.3.0+json',
+                'Conekta-Client-User-Agent': '{"agent":"Conekta JavascriptBindings/0.3.0"}',
                 'Authorization': 'Basic ' + Base64.encode(Conekta.getPublishableKey() + ':')
               },
               data: JSON.stringify(params.data)
@@ -300,62 +356,6 @@
 }).call(this);
 
 (function() {
-  var parse_form;
-
-  parse_form = function(charge_form) {
-    var all_inputs, attribute, attribute_name, attributes, charge, i, input, inputs, key, last_attribute, line_items, node, parent_node, textareas, val, _i, _j, _k, _l, _len, _len1, _ref, _ref1;
-    charge = {};
-    if (typeof charge_form === 'object') {
-      if (typeof jQuery !== 'undefined' && charge_form instanceof jQuery) {
-        charge_form = charge_form.get()[0];
-      }
-      if (charge_form.nodeType) {
-        textareas = charge_form.getElementsByTagName('textarea');
-        inputs = charge_form.getElementsByTagName('input');
-        all_inputs = new Array(textareas.length + inputs.length);
-        for (i = _i = 0, _ref = textareas.length - 1; _i <= _ref; i = _i += 1) {
-          all_inputs[i] = textareas[i];
-        }
-        for (i = _j = 0, _ref1 = inputs.length - 1; _j <= _ref1; i = _j += 1) {
-          all_inputs[i + textareas.length] = inputs[i];
-        }
-        for (_k = 0, _len = all_inputs.length; _k < _len; _k++) {
-          input = all_inputs[_k];
-          if (input) {
-            attribute_name = input.getAttribute('data-conekta');
-            if (attribute_name) {
-              val = input.getAttribute('value') || input.innerHTML || input.value;
-              attributes = attribute_name.replace(/\]/g, '').replace(/\-/g, '_').split(/\[/);
-              parent_node = null;
-              node = charge;
-              last_attribute = null;
-              for (_l = 0, _len1 = attributes.length; _l < _len1; _l++) {
-                attribute = attributes[_l];
-                if (!node[attribute]) {
-                  node[attribute] = {};
-                }
-                parent_node = node;
-                last_attribute = attribute;
-                node = node[attribute];
-              }
-              parent_node[last_attribute] = val;
-            }
-          }
-        }
-      } else {
-        charge = charge_form;
-      }
-      if (charge.details && charge.details.line_items && Object.prototype.toString.call(charge.details.line_items) !== '[object Array]' && typeof charge.details.line_items === 'object') {
-        line_items = [];
-        for (key in charge.details.line_items) {
-          line_items.push(charge.details.line_items[key]);
-        }
-        charge.details.line_items = line_items;
-      }
-    }
-    return charge;
-  };
-
   Conekta.charge = {};
 
   Conekta.charge.create = function(charge_form, success_callback, failure_callback) {
@@ -366,7 +366,7 @@
     if (typeof failure_callback !== 'function') {
       failure_callback = Conekta._helpers.log;
     }
-    charge = parse_form(charge_form);
+    charge = Conekta._helpers.parseForm(charge_form);
     charge.session_id = Conekta._helpers.getSessionId();
     if (typeof charge === 'object') {
       return Conekta._helpers.xDomainPost({
@@ -541,6 +541,38 @@
       length_valid = is_valid_length(number, card_type);
     }
     return luhn_valid && length_valid;
+  };
+
+}).call(this);
+
+(function() {
+  Conekta.token = {};
+
+  Conekta.token.create = function(token_form, success_callback, failure_callback) {
+    var token;
+    if (typeof success_callback !== 'function') {
+      success_callback = Conekta._helpers.log;
+    }
+    if (typeof failure_callback !== 'function') {
+      failure_callback = Conekta._helpers.log;
+    }
+    token = Conekta._helpers.parseForm(token_form);
+    token.session_id = Conekta._helpers.getSessionId();
+    if (typeof token === 'object') {
+      return Conekta._helpers.xDomainPost({
+        jsonp_url: 'tokens/create',
+        url: 'tokens',
+        data: token,
+        success: success_callback,
+        error: failure_callback
+      });
+    } else {
+      return failure_callback({
+        'object': 'error',
+        'type': 'invalid_request_error',
+        'message': "Supplied parameter 'token' is not a javascript object"
+      });
+    }
   };
 
 }).call(this);
