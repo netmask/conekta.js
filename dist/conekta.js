@@ -38,7 +38,7 @@
 (function() {
   var Base64, base_url, fingerprint, i, publishable_key, session_id, useable_characters, _i;
 
-  base_url = 'https://api.conekta.io';
+  base_url = 'https://api.conekta.io/';
 
   publishable_key = null;
 

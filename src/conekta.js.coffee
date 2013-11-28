@@ -1,4 +1,4 @@
-base_url = 'https://api.conekta.io'
+base_url = 'https://api.conekta.io/'
 publishable_key = null
 session_id = ""
 
