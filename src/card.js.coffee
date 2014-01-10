@@ -101,8 +101,8 @@ Conekta.card.validateExpiry = (month, year)->
   if typeof month == 'string' and month.match(/^[\d]{1,2}$/)
     month = parseInt(month)
 
-  if year.match(/^([\d]{2,2}|20[\d]{2,2})$/)
-    if typeof year == 'string' and year.match(/^([\d]{2,2})$/)
+  if typeof year == 'string' and year.match(/^([\d]{2,2}|20[\d]{2,2})$/)
+    if year.match(/^([\d]{2,2})$/)
       year = '20' + year
     year = parseInt(year)
 

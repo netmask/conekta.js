@@ -8,7 +8,7 @@ Conekta.token.create = (token_form, success_callback, failure_callback)->
     failure_callback = Conekta._helpers.log
 
   token = Conekta._helpers.parseForm(token_form)
-  token.session_id = Conekta._helpers.getSessionId()
+  token.card.device_fingerprint = Conekta._helpers.getSessionId()
 
   if typeof token == 'object'
     #charge.capture = false

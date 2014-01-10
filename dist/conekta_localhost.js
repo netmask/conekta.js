@@ -38,7 +38,7 @@
 (function() {
   var Base64, base_url, fingerprint, i, publishable_key, session_id, useable_characters, _i;
 
-  base_url = 'https://api.conekta.io/';
+  base_url = 'http://localhost:9292/';
 
   publishable_key = null;
 
@@ -513,8 +513,8 @@
     if (typeof month === 'string' && month.match(/^[\d]{1,2}$/)) {
       month = parseInt(month);
     }
-    if (typeof year === 'string' && year.match(/^([\d]{2,2}|20[\d]{2,2})$/)) {
-      if (year.match(/^([\d]{2,2})$/)) {
+    if (year.match(/^([\d]{2,2}|20[\d]{2,2})$/)) {
+      if (typeof year === 'string' && year.match(/^([\d]{2,2})$/)) {
         year = '20' + year;
       }
       year = parseInt(year);

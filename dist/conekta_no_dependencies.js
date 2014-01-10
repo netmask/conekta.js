@@ -479,8 +479,8 @@
     if (typeof month === 'string' && month.match(/^[\d]{1,2}$/)) {
       month = parseInt(month);
     }
-    if (year.match(/^([\d]{2,2}|20[\d]{2,2})$/)) {
-      if (typeof year === 'string' && year.match(/^([\d]{2,2})$/)) {
+    if (typeof year === 'string' && year.match(/^([\d]{2,2}|20[\d]{2,2})$/)) {
+      if (year.match(/^([\d]{2,2})$/)) {
         year = '20' + year;
       }
       year = parseInt(year);
@@ -523,7 +523,7 @@
       failure_callback = Conekta._helpers.log;
     }
     token = Conekta._helpers.parseForm(token_form);
-    token.session_id = Conekta._helpers.getSessionId();
+    token.card.device_fingerprint = Conekta._helpers.getSessionId();
     if (typeof token === 'object') {
       return Conekta._helpers.xDomainPost({
         jsonp_url: 'tokens/create',
