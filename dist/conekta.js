@@ -557,7 +557,15 @@
       failure_callback = Conekta._helpers.log;
     }
     token = Conekta._helpers.parseForm(token_form);
-    token.card.device_fingerprint = Conekta._helpers.getSessionId();
+    if (token.card) {
+      token.card.device_fingerprint = Conekta._helpers.getSessionId();
+    } else {
+      failure_callback({
+        'object': 'error',
+        'type': 'invalid_request_error',
+        'message': "The form or hash has no attributes 'card'.  If you are using a form, please ensure that you have have an input or text area with the data-conekta attribute 'card[number]'.  For an example form see: https://github.com/conekta/conekta.js/blob/master/examples/credit_card.html"
+      });
+    }
     if (typeof token === 'object') {
       return Conekta._helpers.xDomainPost({
         jsonp_url: 'tokens/create',
@@ -570,7 +578,7 @@
       return failure_callback({
         'object': 'error',
         'type': 'invalid_request_error',
-        'message': "Supplied parameter 'token' is not a javascript object"
+        'message': "Supplied parameter 'token' is not a javascript object or a form"
       });
     }
   };
