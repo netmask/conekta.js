@@ -388,7 +388,7 @@
 }).call(this);
 
 (function() {
-  var accepted_cards, card_types, get_card_type, is_valid_length, is_valid_luhn,
+  var accepted_cards, card_types, get_card_type, is_valid_length, is_valid_luhn, parseMonth, parseYear,
     __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
   card_types = [
@@ -485,6 +485,28 @@
     return null;
   };
 
+  parseMonth = function(month) {
+    if (typeof month === 'string' && month.match(/^[\d]{1,2}$/)) {
+      return parseInt(month);
+    } else {
+      return month;
+    }
+  };
+
+  parseYear = function(year) {
+    if (typeof year === 'number' && year < 100) {
+      year += 2000;
+    }
+    if (typeof year === 'string' && year.match(/^([\d]{2,2}|20[\d]{2,2})$/)) {
+      if (year.match(/^([\d]{2,2})$/)) {
+        year = '20' + year;
+      }
+      return parseInt(year);
+    } else {
+      return year;
+    }
+  };
+
   Conekta.card = {};
 
   Conekta.card.getBrand = function(number) {
@@ -502,28 +524,38 @@
   };
 
   Conekta.card.validateCVC = function(cvc) {
-    if ((typeof cvc === 'number' && cvc >= 0 && cvc < 10000) || (typeof cvc === 'string' && cvc.match(/^[\d]{3,4}$/))) {
-      return true;
+    return (typeof cvc === 'number' && cvc >= 0 && cvc < 10000) || (typeof cvc === 'string' && cvc.match(/^[\d]{3,4}$/) !== null);
+  };
+
+  Conekta.card.validateExpMonth = function(exp_month) {
+    var month;
+    month = parseMonth(exp_month);
+    return typeof month === 'number' && month > 0 && month < 13;
+  };
+
+  Conekta.card.validateExpYear = function(exp_year) {
+    var year;
+    year = parseYear(exp_year);
+    return typeof year === 'number' && year > 2013 && year < 2035;
+  };
+
+  Conekta.card.validateExpirationDate = function(exp_month, exp_year) {
+    var month, year;
+    month = parseMonth(exp_month);
+    year = parseYear(exp_year);
+    if ((typeof month === 'number' && month > 0 && month < 13) && (typeof year === 'number' && year > 2013 && year < 2035)) {
+      return Date.parse(month + '/' + new Date(year, month, 0).getDate() + '/' + year) > Date.now();
     } else {
       return false;
     }
   };
 
-  Conekta.card.validateExpiry = function(month, year) {
-    if (typeof month === 'string' && month.match(/^[\d]{1,2}$/)) {
-      month = parseInt(month);
-    }
-    if (typeof year === 'string' && year.match(/^([\d]{2,2}|20[\d]{2,2})$/)) {
-      if (year.match(/^([\d]{2,2})$/)) {
-        year = '20' + year;
-      }
-      year = parseInt(year);
-    }
-    if ((typeof month === 'number' && month > 0 && month < 13) && (typeof year === 'number' && year > 2012 && year < 2050)) {
-      return Date.parse(month + '/' + new Date(year, month, 0).getDate() + '/' + year) > Date.now();
-    } else {
-      return false;
-    }
+  Conekta.card.validateExpiry = function(exp_month, exp_year) {
+    return Conekta.card.validateExpirationDate(exp_month, exp_year);
+  };
+
+  Conekta.card.validateName = function(name) {
+    return typeof name === 'string' && name.match(/^\s*[A-z]+\s+[A-z]+[\sA-z]*$/) !== null && name.match(/visa|master\s*card|amex|american\s*express|banorte|banamex|bancomer|hsbc|scotiabank|jcb|diners\s*club|discover/i) === null;
   };
 
   Conekta.card.validateNumber = function(number) {

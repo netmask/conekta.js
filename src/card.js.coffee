@@ -76,13 +76,16 @@ get_card_type = (number) ->
 
   null
 
-parse_month = (month)->
+parseMonth = (month)->
   if typeof month == 'string' and month.match(/^[\d]{1,2}$/)
     parseInt(month)
   else
     month
 
-parse_year = (year)->
+parseYear = (year)->
+  if typeof year == 'number' and year < 100
+    year += 2000
+
   if typeof year == 'string' and year.match(/^([\d]{2,2}|20[\d]{2,2})$/)
     if year.match(/^([\d]{2,2})$/)
       year = '20' + year
@@ -106,27 +109,31 @@ Conekta.card.getBrand = (number)->
   null
 
 Conekta.card.validateCVC = (cvc)->
-  (typeof cvc == 'number' and cvc >=0 and cvc < 10000) or (typeof cvc == 'string' and cvc.match(/^[\d]{3,4}$/))
+  (typeof cvc == 'number' and cvc >=0 and cvc < 10000) or (typeof cvc == 'string' and cvc.match(/^[\d]{3,4}$/) != null)
 
-Conekta.card.validateExpMonth = (month)->
-  month = parse_month(month)
-  (typeof month == 'number' and month > 0 and month < 13) 
+Conekta.card.validateExpMonth = (exp_month)->
+  month = parseMonth(exp_month)
+  (typeof month == 'number' and month > 0 and month < 13)
 
-Conekta.card.validateExpYear = (year)->
-  year = parseYear(year)
-  (typeof year == 'number' and year > 2012 and year < 2050)
+Conekta.card.validateExpYear = (exp_year)->
+  year = parseYear(exp_year)
+  (typeof year == 'number' and year > 2013 and year < 2035)
 
-Conekta.card.validateExpiry = (month, year)->
-  month = parseMonth(month)
-  year = parseYear(year)
+Conekta.card.validateExpirationDate = (exp_month, exp_year)->
+  month = parseMonth(exp_month)
+  year = parseYear(exp_year)
 
-  if (typeof month == 'number' and month > 0 and month < 13) and (typeof year == 'number' and year > 2012 and year < 2050)
+  if (typeof month == 'number' and month > 0 and month < 13) and (typeof year == 'number' and year > 2013 and year < 2035)
     Date.parse(month + '/' + new Date(year, month,0).getDate() + '/' + year) > Date.now()
   else
     false
 
+#Deprecating this method
+Conekta.card.validateExpiry = (exp_month, exp_year)->
+  Conekta.card.validateExpirationDate(exp_month, exp_year)
+
 Conekta.card.validateName = (name) ->
-  (typeof name == 'string' and name.match(/^\s*[A-z]+\s+[A-z]+[\sA-z]*$/) and ! name.match(/visa|master\s*card|amex|american\s*express/i))
+  (typeof name == 'string' and name.match(/^\s*[A-z]+\s+[A-z]+[\sA-z]*$/) != null and name.match(/visa|master\s*card|amex|american\s*express|banorte|banamex|bancomer|hsbc|scotiabank|jcb|diners\s*club|discover/i) == null)
 
 Conekta.card.validateNumber = (number) ->
   if typeof number == 'string'
