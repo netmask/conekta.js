@@ -1,9 +1,8 @@
-/*conekta.js v0.1.0 | 2013- Conekta | https://github.com/conekta/conekta.js/blob/master/LICENSE-MIT.txt
+/*conekta.js v0.3.0 | 2013- Conekta | https://github.com/conekta/conekta.js/blob/master/LICENSE-MIT.txt
 */
 
 (function() {
-  var Base64, base_url, fingerprint, i, publishable_key, session_id, useable_characters, _i,
-    __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
+  var Base64, base_url, fingerprint, i, publishable_key, session_id, useable_characters, _i;
 
   base_url = 'https://api.conekta.io/';
 
@@ -187,7 +186,7 @@
         var all_inputs, attribute, attribute_name, attributes, charge, input, inputs, key, last_attribute, line_items, node, parent_node, textareas, val, _j, _k, _l, _len, _len1, _m, _ref, _ref1;
         charge = {};
         if (typeof charge_form === 'object') {
-          if (typeof jQuery !== 'undefined' && (charge_form instanceof jQuery || __indexOf.call(Object(charge_form), 'jquery') >= 0)) {
+          if (typeof jQuery !== 'undefined' && (charge_form instanceof jQuery || 'jquery' in Object(charge_form))) {
             charge_form = charge_form.get()[0];
           }
           if (charge_form.nodeType) {
