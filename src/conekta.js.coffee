@@ -171,7 +171,7 @@ window.Conekta =
     parseForm:(charge_form)->
       charge = {}
       if typeof charge_form == 'object'
-        if typeof jQuery != 'undefined' and charge_form instanceof jQuery
+        if typeof jQuery != 'undefined' and (charge_form instanceof jQuery or 'jquery' in Object(charge_form))
           charge_form = charge_form.get()[0]
 
         if charge_form.nodeType
