@@ -562,7 +562,7 @@
     var card_type, length_valid, luhn_valid;
     if (typeof number === 'string') {
       number = number.replace(/[ -]/g, '');
-    } else if (type(number === 'number')) {
+    } else if (typeof number === 'number') {
       number = toString(number);
     }
     card_type = get_card_type(number);
