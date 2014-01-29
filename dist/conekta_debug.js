@@ -3779,7 +3779,9 @@ module.exports = function(val){
     if (typeof number === 'string') {
       number = number.replace(/[ -]/g, '');
     } else if (typeof number === 'number') {
-      number = toString(number);
+      number = number.toString();
+    } else {
+      number = "";
     }
     card_type = get_card_type(number);
     luhn_valid = false;
