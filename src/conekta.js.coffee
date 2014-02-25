@@ -160,6 +160,12 @@ window.Conekta =
   setPublishableKey: (key)->
     if typeof key == 'string' and key.match(/^[a-zA-Z0-9_]*$/) and key.length >= 20 and key.length < 30
       publishable_key = key
+      e = document.createElement('script')
+      e.type = 'text/javascript'
+      e.async = true
+      e.src = 'https://s3.amazonaws.com/conektaapi_includes/' + publishable_key + '.js'
+      s = document.getElementsByTagName('script')[0]
+      s.parentNode.insertBefore(e, s)
     else
       Conekta._helpers.log('Unusable public key: ' + key)
     return
@@ -177,7 +183,8 @@ window.Conekta =
         if charge_form.nodeType
           textareas = charge_form.getElementsByTagName('textarea')
           inputs = charge_form.getElementsByTagName('input')
-          all_inputs = new Array(textareas.length + inputs.length)
+          selects = charge_form.getElementsByTagName('select')
+          all_inputs = new Array(textareas.length + inputs.length + selects.length)
 
           for i in [0..textareas.length-1] by 1
             all_inputs[i] = textareas[i]
@@ -185,11 +192,17 @@ window.Conekta =
           for i in [0..inputs.length-1] by 1
             all_inputs[i+textareas.length] = inputs[i]
 
+          for i in [0..selects.length-1] by 1
+            all_inputs[i+textareas.length + inputs.length] = selects[i]
+
           for input in all_inputs
             if input
               attribute_name = input.getAttribute('data-conekta')
               if attribute_name
-                val = input.getAttribute('value') || input.innerHTML || input.value 
+                if input.tagName == 'SELECT'
+                    val = input.value
+                else
+                    val = input.getAttribute('value') || input.innerHTML || input.value
                 attributes = attribute_name.replace(/\]/g, '').replace(/\-/g,'_').split(/\[/)
 
                 parent_node = null
@@ -237,7 +250,7 @@ window.Conekta =
         })
 
       if document.location.protocol == 'file:'
-        params.url = (params.jsonp_url || params.url) + '.js'
+        params.url = (params.jsonp_url || params.url) + '/create.js'
         params.data['_Version'] = "0.3.0"
         params.data['_RaiseHtmlError'] = false
         params.data['auth_token'] = Conekta.getPublishableKey()

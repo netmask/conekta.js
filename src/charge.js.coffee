@@ -9,6 +9,8 @@ Conekta.charge.create = (charge_form, success_callback, failure_callback)->
 
   charge = Conekta._helpers.parseForm(charge_form)
   charge.session_id = Conekta._helpers.getSessionId()
+  if charge.card and charge.card.address and !(charge.card.address.street1 or charge.card.address.street2 or charge.card.address.street3 or charge.card.address.city or charge.card.address.state or charge.card.address.country or charge.card.address.zip)
+    delete(charge.card.address)
 
   if typeof charge == 'object'
     #charge.capture = false
