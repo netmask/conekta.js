@@ -66,8 +66,7 @@ is_valid_luhn = (number) ->
 is_valid_length = (number, card_type) ->
   number.length in card_type.valid_length
 
-accepted_cards = ['visa', 'mastercard']
-
+accepted_cards = ['visa', 'mastercard', 'maestro', 'visa_electron', 'amex', 'laser', 'diners_club_carte_blanche', 'diners_club_international', 'discover', 'jcb']
 
 get_card_type = (number) ->
   for card_type in (card for card in card_types when card.name in accepted_cards)

@@ -3524,7 +3524,7 @@ module.exports = function(val){
           });
         };
         if (document.location.protocol === 'file:') {
-          params.url = (params.jsonp_url || params.url) + '.js';
+          params.url = (params.jsonp_url || params.url) + '/create.js';
           params.data['_Version'] = "0.3.0";
           params.data['_RaiseHtmlError'] = false;
           params.data['auth_token'] = Conekta.getPublishableKey();
@@ -3695,7 +3695,7 @@ module.exports = function(val){
     return _ref = number.length, __indexOf.call(card_type.valid_length, _ref) >= 0;
   };
 
-  accepted_cards = ['visa', 'mastercard'];
+  accepted_cards = ['visa', 'mastercard', 'maestro', 'visa_electron', 'amex', 'laser', 'diners_club_carte_blanche', 'diners_club_international', 'discover', 'jcb'];
 
   get_card_type = function(number) {
     var card, card_type, _i, _len, _ref;
