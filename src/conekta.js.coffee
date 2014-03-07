@@ -160,12 +160,6 @@ window.Conekta =
   setPublishableKey: (key)->
     if typeof key == 'string' and key.match(/^[a-zA-Z0-9_]*$/) and key.length >= 20 and key.length < 30
       publishable_key = key
-      e = document.createElement('script')
-      e.type = 'text/javascript'
-      e.async = true
-      e.src = 'https://s3.amazonaws.com/conektaapi_includes/' + publishable_key + '.js'
-      s = document.getElementsByTagName('script')[0]
-      s.parentNode.insertBefore(e, s)
     else
       Conekta._helpers.log('Unusable public key: ' + key)
     return
