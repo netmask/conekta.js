@@ -168,11 +168,22 @@ window.Conekta =
     publishable_key
 
   _helpers:
+    objectKeys:(obj)->
+      keys = []
+      for p in o
+        if Object.prototype.hasOwnProperty.call(o,p)
+          keys.push(p)
+      return keys
+
     parseForm:(charge_form)->
       charge = {}
       if typeof charge_form == 'object'
         if typeof jQuery != 'undefined' and (charge_form instanceof jQuery or 'jquery' of Object(charge_form))
           charge_form = charge_form.get()[0]
+          #if jquery selector returned nothing
+          if typeof charge_form != 'object'
+            return {}
+
 
         if charge_form.nodeType
           textareas = charge_form.getElementsByTagName('textarea')

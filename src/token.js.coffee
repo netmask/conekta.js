@@ -8,27 +8,34 @@ Conekta.token.create = (token_form, success_callback, failure_callback)->
     failure_callback = Conekta._helpers.log
 
   token = Conekta._helpers.parseForm(token_form)
-  if token.card
-    token.card.device_fingerprint = Conekta._helpers.getSessionId()
-  else
-    failure_callback(
-      'object':'error'
-      'type':'invalid_request_error'
-      'message':"The form or hash has no attributes 'card'.  If you are using a form, please ensure that you have have an input or text area with the data-conekta attribute 'card[number]'.  For an example form see: https://github.com/conekta/conekta.js/blob/master/examples/credit_card.html"
-    )
-
-  if token.card and token.card.address and !(token.card.address.street1 or token.card.address.street2 or token.card.address.street3 or token.card.address.city or token.card.address.state or token.card.address.country or token.card.address.zip)
-    delete(token.card.address)
 
   if typeof token == 'object'
-    #charge.capture = false
-    Conekta._helpers.xDomainPost(
-      jsonp_url:'tokens/create'#'https://api.conekta.io'
-      url:'tokens'#'https://api.conekta.io'
-      data:token
-      success:success_callback
-      error:failure_callback
-    )
+    if Conekta._helpers.objectKeys(token).length > 0
+      if token.card
+        token.card.device_fingerprint = Conekta._helpers.getSessionId()
+      else
+        failure_callback(
+          'object':'error'
+          'type':'invalid_request_error'
+          'message':"The form or hash has no attributes 'card'.  If you are using a form, please ensure that you have have an input or text area with the data-conekta attribute 'card[number]'.  For an example form see: https://github.com/conekta/conekta.js/blob/master/examples/credit_card.html"
+        )
+
+      if token.card and token.card.address and !(token.card.address.street1 or token.card.address.street2 or token.card.address.street3 or token.card.address.city or token.card.address.state or token.card.address.country or token.card.address.zip)
+        delete(token.card.address)
+
+      Conekta._helpers.xDomainPost(
+        jsonp_url:'tokens/create'#'https://api.conekta.io'
+        url:'tokens'#'https://api.conekta.io'
+        data:token
+        success:success_callback
+        error:failure_callback
+      )
+    else
+      failure_callback(
+        'object':'error'
+        'type':'invalid_request_error'
+        'message':"supplied parameter 'token' is usable object but has no values (e.g. amount, description) associated with it"
+      )
   else
     failure_callback(
       'object':'error'

@@ -3432,12 +3432,26 @@ module.exports = function(val){
       return publishable_key;
     },
     _helpers: {
+      objectKeys: function(obj) {
+        var keys, p, _j, _len;
+        keys = [];
+        for (_j = 0, _len = o.length; _j < _len; _j++) {
+          p = o[_j];
+          if (Object.prototype.hasOwnProperty.call(o, p)) {
+            keys.push(p);
+          }
+        }
+        return keys;
+      },
       parseForm: function(charge_form) {
         var all_inputs, attribute, attribute_name, attributes, charge, input, inputs, key, last_attribute, line_items, node, parent_node, selects, textareas, val, _j, _k, _l, _len, _len1, _m, _n, _ref, _ref1, _ref2;
         charge = {};
         if (typeof charge_form === 'object') {
           if (typeof jQuery !== 'undefined' && (charge_form instanceof jQuery || 'jquery' in Object(charge_form))) {
             charge_form = charge_form.get()[0];
+            if (typeof charge_form !== 'object') {
+              return {};
+            }
           }
           if (charge_form.nodeType) {
             textareas = charge_form.getElementsByTagName('textarea');
@@ -3591,23 +3605,31 @@ module.exports = function(val){
       failure_callback = Conekta._helpers.log;
     }
     charge = Conekta._helpers.parseForm(charge_form);
-    charge.session_id = Conekta._helpers.getSessionId();
-    if (charge.card && charge.card.address && !(charge.card.address.street1 || charge.card.address.street2 || charge.card.address.street3 || charge.card.address.city || charge.card.address.state || charge.card.address.country || charge.card.address.zip)) {
-      delete charge.card.address;
-    }
     if (typeof charge === 'object') {
-      return Conekta._helpers.xDomainPost({
-        jsonp_url: 'charges/create',
-        url: 'charges',
-        data: charge,
-        success: success_callback,
-        error: failure_callback
-      });
+      if (Conekta._helpers.objectKeys(charge).length > 0) {
+        charge.session_id = Conekta._helpers.getSessionId();
+        if (charge.card && charge.card.address && !(charge.card.address.street1 || charge.card.address.street2 || charge.card.address.street3 || charge.card.address.city || charge.card.address.state || charge.card.address.country || charge.card.address.zip)) {
+          delete charge.card.address;
+        }
+        return Conekta._helpers.xDomainPost({
+          jsonp_url: 'charges/create',
+          url: 'charges',
+          data: charge,
+          success: success_callback,
+          error: failure_callback
+        });
+      } else {
+        return failure_callback({
+          'object': 'error',
+          'type': 'invalid_request_error',
+          'message': "supplied parameter 'charge' is usable object but has no values (e.g. amount, description) associated with it"
+        });
+      }
     } else {
       return failure_callback({
         'object': 'error',
         'type': 'invalid_request_error',
-        'message': "Supplied parameter 'charge' is not a javascript object"
+        'message': "supplied parameter 'charge' is not a javascript object"
       });
     }
   };
@@ -3818,26 +3840,34 @@ module.exports = function(val){
       failure_callback = Conekta._helpers.log;
     }
     token = Conekta._helpers.parseForm(token_form);
-    if (token.card) {
-      token.card.device_fingerprint = Conekta._helpers.getSessionId();
-    } else {
-      failure_callback({
-        'object': 'error',
-        'type': 'invalid_request_error',
-        'message': "The form or hash has no attributes 'card'.  If you are using a form, please ensure that you have have an input or text area with the data-conekta attribute 'card[number]'.  For an example form see: https://github.com/conekta/conekta.js/blob/master/examples/credit_card.html"
-      });
-    }
-    if (token.card && token.card.address && !(token.card.address.street1 || token.card.address.street2 || token.card.address.street3 || token.card.address.city || token.card.address.state || token.card.address.country || token.card.address.zip)) {
-      delete token.card.address;
-    }
     if (typeof token === 'object') {
-      return Conekta._helpers.xDomainPost({
-        jsonp_url: 'tokens/create',
-        url: 'tokens',
-        data: token,
-        success: success_callback,
-        error: failure_callback
-      });
+      if (Conekta._helpers.objectKeys(token).length > 0) {
+        if (token.card) {
+          token.card.device_fingerprint = Conekta._helpers.getSessionId();
+        } else {
+          failure_callback({
+            'object': 'error',
+            'type': 'invalid_request_error',
+            'message': "The form or hash has no attributes 'card'.  If you are using a form, please ensure that you have have an input or text area with the data-conekta attribute 'card[number]'.  For an example form see: https://github.com/conekta/conekta.js/blob/master/examples/credit_card.html"
+          });
+        }
+        if (token.card && token.card.address && !(token.card.address.street1 || token.card.address.street2 || token.card.address.street3 || token.card.address.city || token.card.address.state || token.card.address.country || token.card.address.zip)) {
+          delete token.card.address;
+        }
+        return Conekta._helpers.xDomainPost({
+          jsonp_url: 'tokens/create',
+          url: 'tokens',
+          data: token,
+          success: success_callback,
+          error: failure_callback
+        });
+      } else {
+        return failure_callback({
+          'object': 'error',
+          'type': 'invalid_request_error',
+          'message': "supplied parameter 'token' is usable object but has no values (e.g. amount, description) associated with it"
+        });
+      }
     } else {
       return failure_callback({
         'object': 'error',
