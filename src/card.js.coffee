@@ -123,7 +123,7 @@ Conekta.card.validateExpirationDate = (exp_month, exp_year)->
   year = parseYear(exp_year)
 
   if (typeof month == 'number' and month > 0 and month < 13) and (typeof year == 'number' and year > 2013 and year < 2035)
-    Date.parse(month + '/' + new Date(year, month,0).getDate() + '/' + year) > Date.now()
+    ((new Date(year, month, new Date(year, month,0).getDate())) > (new Date()))
   else
     false
 

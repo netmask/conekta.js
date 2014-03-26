@@ -36,13 +36,15 @@
 */
 
 (function() {
-  var Base64, base_url, fingerprint, i, publishable_key, session_id, useable_characters, _i;
+  var Base64, base_url, fingerprint, i, publishable_key, session_id, useable_characters, _i, _language;
 
   base_url = 'https://api.conekta.io/';
 
   publishable_key = null;
 
   session_id = "";
+
+  _language = 'es';
 
   useable_characters = "abcdefghijklmnopqrstuvwxyz0123456789";
 
@@ -205,6 +207,12 @@
   };
 
   window.Conekta = {
+    setLanguage: function(language) {
+      return _language = language;
+    },
+    getLanguage: function() {
+      return _language;
+    },
     setPublishableKey: function(key) {
       if (typeof key === 'string' && key.match(/^[a-zA-Z0-9_]*$/) && key.length >= 20 && key.length < 30) {
         publishable_key = key;
@@ -217,11 +225,10 @@
     },
     _helpers: {
       objectKeys: function(obj) {
-        var keys, p, _j, _len;
+        var keys, p;
         keys = [];
-        for (_j = 0, _len = o.length; _j < _len; _j++) {
-          p = o[_j];
-          if (Object.prototype.hasOwnProperty.call(o, p)) {
+        for (p in obj) {
+          if (Object.prototype.hasOwnProperty.call(obj, p)) {
             keys.push(p);
           }
         }
@@ -338,6 +345,7 @@
               headers: {
                 'RaiseHtmlError': false,
                 'Accept': 'application/vnd.conekta-v0.3.0+json',
+                'Accept-Language': Conekta.getLanguage(),
                 'Conekta-Client-User-Agent': '{"agent":"Conekta JavascriptBindings/0.3.0"}',
                 'Authorization': 'Basic ' + Base64.encode(Conekta.getPublishableKey() + ':')
               },
@@ -359,6 +367,7 @@
               headers: {
                 'RaiseHtmlError': false,
                 'Accept': 'application/vnd.conekta-v0.3.0+json',
+                'Accept-Language': Conekta.getLanguage(),
                 'Conekta-Client-User-Agent': '{"agent":"Conekta JavascriptBindings/0.3.0"}',
                 'Authorization': 'Basic ' + Base64.encode(Conekta.getPublishableKey() + ':')
               },
@@ -406,14 +415,14 @@
         return failure_callback({
           'object': 'error',
           'type': 'invalid_request_error',
-          'message': "supplied parameter 'charge' is usable object but has no values (e.g. amount, description) associated with it"
+          'message': "Supplied parameter 'charge' is usable object but has no values (e.g. amount, description) associated with it"
         });
       }
     } else {
       return failure_callback({
         'object': 'error',
         'type': 'invalid_request_error',
-        'message': "supplied parameter 'charge' is not a javascript object"
+        'message': "Supplied parameter 'charge' is not a javascript object"
       });
     }
   };
@@ -577,7 +586,7 @@
     month = parseMonth(exp_month);
     year = parseYear(exp_year);
     if ((typeof month === 'number' && month > 0 && month < 13) && (typeof year === 'number' && year > 2013 && year < 2035)) {
-      return Date.parse(month + '/' + new Date(year, month, 0).getDate() + '/' + year) > Date.now();
+      return (new Date(year, month, new Date(year, month, 0).getDate())) > (new Date());
     } else {
       return false;
     }

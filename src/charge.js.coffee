@@ -26,11 +26,11 @@ Conekta.charge.create = (charge_form, success_callback, failure_callback)->
       failure_callback(
         'object':'error'
         'type':'invalid_request_error'
-        'message':"supplied parameter 'charge' is usable object but has no values (e.g. amount, description) associated with it"
+        'message':"Supplied parameter 'charge' is usable object but has no values (e.g. amount, description) associated with it"
       )
   else
     failure_callback(
       'object':'error'
       'type':'invalid_request_error'
-      'message':"supplied parameter 'charge' is not a javascript object"
+      'message':"Supplied parameter 'charge' is not a javascript object"
     )
