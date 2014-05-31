@@ -304,7 +304,7 @@
       xDomainPost: function(params) {
         var error_callback, rpc, success_callback;
         success_callback = function(data, textStatus, jqXHR) {
-          if (!data || (data.object === 'error')) {
+          if (!data || (data.object === 'error') || !data.id) {
             return params.error(data || {
               object: 'error',
               type: 'api_error',

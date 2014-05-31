@@ -245,7 +245,7 @@ window.Conekta =
 
     xDomainPost:(params)->
       success_callback = (data, textStatus, jqXHR)->
-        if ! data or (data.object == 'error')
+        if ! data or (data.object == 'error') or ! data.id
           params.error(data || {
             object: 'error',
             type:'api_error',
