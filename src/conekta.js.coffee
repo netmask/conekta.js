@@ -39,11 +39,10 @@ fingerprint = ->
 
       return
 
-    if navigator.userAgent.match(/MSIE [5-9]+/) and document.readyState != 'complete'
+    if window.attachEvent
       window.attachEvent("onload", add_swf)
-    else
-      add_swf()
-
+    else if window.addEventListener
+      window.addEventListener("load", add_swf, false)
 
     #fingerprinting script
     fingerprint_script = document.createElement('script')
