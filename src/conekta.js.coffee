@@ -293,7 +293,7 @@ window.Conekta =
           )
         else
           rpc = new easyXDM.Rpc({
-            swf:"https://conektaapi.s3.amazonaws.com/v0.3.0/flash/easyxdm.swf"
+            swf:"https://conektaapi.s3.amazonaws.com/v0.3.2/flash/easyxdm.swf"
             remote: base_url + "easyxdm_cors_proxy.html"
           },{
             remote:{
