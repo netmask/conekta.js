@@ -1,4 +1,8 @@
-A simple library to process payments.
+![alt tag](https://raw.github.com/conekta/conekta.js/master/readme_files/cover.png)
+
+# Conekta.JS 9.3.1 
+
+## A simple library to process payments.
 
 Before you get started, you will need to create an account on https://admin.conekta.io.  After creating and activating your company, you will have access to a set of keys (https://admin.conekta.io#developer.keys) which will allow you to begin processing payments.  To get started, include conekta.js (https://s3.amazonaws.com/conektaapi/v0.2.0/js/conekta.js) on your page and set your public keys:
 
@@ -68,3 +72,6 @@ For bank_transfers:
         }
     );
 
+License
+-------
+Developed by [Conekta](https://www.conekta.io). Available with [MIT License](LICENSE).
