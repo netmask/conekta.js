@@ -1,6 +1,6 @@
 ![alt tag](https://raw.github.com/conekta/conekta.js/master/readme_files/cover.png)
 
-# Conekta.JS 9.3.1 
+# Conekta.JS 0.3.1 
 
 ## A simple library to process payments.
 
