@@ -8,69 +8,71 @@ Before you get started, you will need to create an account on https://admin.cone
 
     Conekta.setPublishableKey('xxxxxxxxxxxxxxxx');
 
-
 To start processing credit cards do this:
-
-    Conekta.charge.new({
-      amount:10000,
-      currency:'MXN',
-      description:'Double-black belt'
-      card:{
-        name:'Bruce Lee',
-        number:'4111111111111111',
-        exp_year:'12',
-        exp_month:'04',
-        cvv:'123',
-      }
-    },
-    function(charge){
-      alert('Success!');
-    },
-    function(response){
-      alert('Fail!');
-    }
-    );
+```node
+Conekta.charge.new({
+  amount:10000,
+  currency:'MXN',
+  description:'Double-black belt'
+  card:{
+    name:'Bruce Lee',
+    number:'4111111111111111',
+    exp_year:'12',
+    exp_month:'04',
+    cvv:'123',
+  }
+},
+  function(charge){
+    alert('Success!');
+  },
+  function(response){
+    alert('Fail!');
+  }
+);
+```
 
 For oxxo:
-
-    Conekta.charge.new(
-        {
-          amount:10000,
-          currency:'MXN',
-          description:'Double-black belt'
-          cash:{
-            type:'oxxo'
-          }
-        }, 
-        function(charge){
-            $('#my-oxxo-barcode-tag').attr('src', charge.payment_method.barcode_url);
-        },
-        function(error){
-            alert('Fail!');
-        }
-    );
+```node
+Conekta.charge.new(
+  {
+    amount:10000,
+    currency:'MXN',
+    description:'Double-black belt'
+    cash:{
+      type:'oxxo'
+    }
+  }, 
+  function(charge){
+    $('#my-oxxo-barcode-tag').attr('src', charge.payment_method.barcode_url);
+  },
+  function(error){
+    alert('Fail!');
+  }
+);
+```
 
 For bank_transfers:
-
-    Conekta.charge.new(
-        {
-          amount:10000,
-          currency:'MXN',
-          description:'Double-black belt'
-          bank:{
-            type:'banorte'
-          }
-        }, 
-        function(charge){
-            $('#my-bank-transfer-bank-name-tag').attr('src', charge.payment_method.bank);
-            $('#my-bank-transfer-service-name-tag').attr('src', charge.payment_method.service_name);
-            $('#my-bank-transfer-service-id-tag').attr('src', charge.payment_method.service_id);
-            $('#my-bank-transfer-reference-tag').attr('src', charge.payment_method.reference);
-        },
-        function(error){
-            alert('Fail!');
-        }
-    );
+```node
+Conekta.charge.new(
+  {
+    amount:10000,
+    currency:'MXN',
+    description:'Double-black belt'
+    bank:{
+      type:'banorte'
+    }
+  }, 
+  function(charge){
+    $('#my-bank-transfer-bank-name-tag').attr('src', charge.payment_method.bank);
+    $('#my-bank-transfer-service-name-tag').attr('src', charge.payment_method.service_name);
+    $('#my-bank-transfer-service-id-tag').attr('src', charge.payment_method.service_id);
+    $('#my-bank-transfer-reference-tag').attr('src', charge.payment_method.reference);
+  },
+  function(error){
+    alert('Fail!');
+  }
+);
+```
 
 License
 -------
