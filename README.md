@@ -9,7 +9,7 @@ Before you get started, you will need to create an account on https://admin.cone
     Conekta.setPublishableKey('xxxxxxxxxxxxxxxx');
 
 To start processing credit cards do this:
-```node
+```js
 Conekta.charge.new({
   amount:10000,
   currency:'MXN',
@@ -32,7 +32,7 @@ Conekta.charge.new({
 ```
 
 For oxxo:
-```node
+```js
 Conekta.charge.new(
   {
     amount:10000,
@@ -52,7 +52,7 @@ Conekta.charge.new(
 ```
 
 For bank_transfers:
-```node
+```js
 Conekta.charge.new(
   {
     amount:10000,
