@@ -1,6 +1,7 @@
 base_url = 'https://api.conekta.io/'
 publishable_key = null
 session_id = ""
+_language = 'es'
 
 useable_characters = "abcdefghijklmnopqrstuvwxyz0123456789"
 for i in [0..30]
@@ -156,6 +157,12 @@ Base64 =
     string
 
 window.Conekta = 
+  setLanguage: (language)->
+    _language = language
+
+  getLanguage: ()->
+    _language
+
   setPublishableKey: (key)->
     if typeof key == 'string' and key.match(/^[a-zA-Z0-9_]*$/) and key.length >= 20 and key.length < 30
       publishable_key = key
@@ -167,11 +174,22 @@ window.Conekta =
     publishable_key
 
   _helpers:
+    objectKeys:(obj)->
+      keys = []
+      for p of obj
+        if Object.prototype.hasOwnProperty.call(obj,p)
+          keys.push(p)
+      return keys
+
     parseForm:(charge_form)->
       charge = {}
       if typeof charge_form == 'object'
         if typeof jQuery != 'undefined' and (charge_form instanceof jQuery or 'jquery' of Object(charge_form))
           charge_form = charge_form.get()[0]
+          #if jquery selector returned nothing
+          if typeof charge_form != 'object'
+            return {}
+
 
         if charge_form.nodeType
           textareas = charge_form.getElementsByTagName('textarea')
@@ -226,7 +244,7 @@ window.Conekta =
 
     xDomainPost:(params)->
       success_callback = (data, textStatus, jqXHR)->
-        if ! data or (data.object == 'error')
+        if ! data or (data.object == 'error') or ! data.id
           params.error(data || {
             object: 'error',
             type:'api_error',
@@ -267,6 +285,7 @@ window.Conekta =
             headers:
               'RaiseHtmlError': false
               'Accept': 'application/vnd.conekta-v0.3.0+json'
+              'Accept-Language': Conekta.getLanguage()
               'Conekta-Client-User-Agent':'{"agent":"Conekta JavascriptBindings/0.3.0"}'
               'Authorization':'Basic ' + Base64.encode(Conekta.getPublishableKey() + ':')
             success: success_callback
@@ -274,7 +293,7 @@ window.Conekta =
           )
         else
           rpc = new easyXDM.Rpc({
-            swf:"https://conektaapi.s3.amazonaws.com/v0.3.1/flash/easyxdm.swf"
+            swf:"https://conektaapi.s3.amazonaws.com/v0.3.2/flash/easyxdm.swf"
             remote: base_url + "easyxdm_cors_proxy.html"
           },{
             remote:{
@@ -287,6 +306,7 @@ window.Conekta =
             headers:
               'RaiseHtmlError': false
               'Accept': 'application/vnd.conekta-v0.3.0+json'
+              'Accept-Language': Conekta.getLanguage()
               'Conekta-Client-User-Agent':'{"agent":"Conekta JavascriptBindings/0.3.0"}'
               'Authorization':'Basic ' + Base64.encode(Conekta.getPublishableKey() + ':')
             data:JSON.stringify(params.data)

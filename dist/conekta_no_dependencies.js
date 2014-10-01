@@ -2,13 +2,15 @@
 */
 
 (function() {
-  var Base64, base_url, fingerprint, i, publishable_key, session_id, useable_characters, _i;
+  var Base64, base_url, fingerprint, i, publishable_key, session_id, useable_characters, _i, _language;
 
   base_url = 'https://api.conekta.io/';
 
   publishable_key = null;
 
   session_id = "";
+
+  _language = 'es';
 
   useable_characters = "abcdefghijklmnopqrstuvwxyz0123456789";
 
@@ -171,6 +173,12 @@
   };
 
   window.Conekta = {
+    setLanguage: function(language) {
+      return _language = language;
+    },
+    getLanguage: function() {
+      return _language;
+    },
     setPublishableKey: function(key) {
       if (typeof key === 'string' && key.match(/^[a-zA-Z0-9_]*$/) && key.length >= 20 && key.length < 30) {
         publishable_key = key;
@@ -182,12 +190,25 @@
       return publishable_key;
     },
     _helpers: {
+      objectKeys: function(obj) {
+        var keys, p;
+        keys = [];
+        for (p in obj) {
+          if (Object.prototype.hasOwnProperty.call(obj, p)) {
+            keys.push(p);
+          }
+        }
+        return keys;
+      },
       parseForm: function(charge_form) {
         var all_inputs, attribute, attribute_name, attributes, charge, input, inputs, key, last_attribute, line_items, node, parent_node, selects, textareas, val, _j, _k, _l, _len, _len1, _m, _n, _ref, _ref1, _ref2;
         charge = {};
         if (typeof charge_form === 'object') {
           if (typeof jQuery !== 'undefined' && (charge_form instanceof jQuery || 'jquery' in Object(charge_form))) {
             charge_form = charge_form.get()[0];
+            if (typeof charge_form !== 'object') {
+              return {};
+            }
           }
           if (charge_form.nodeType) {
             textareas = charge_form.getElementsByTagName('textarea');
@@ -249,7 +270,7 @@
       xDomainPost: function(params) {
         var error_callback, rpc, success_callback;
         success_callback = function(data, textStatus, jqXHR) {
-          if (!data || (data.object === 'error')) {
+          if (!data || (data.object === 'error') || !data.id) {
             return params.error(data || {
               object: 'error',
               type: 'api_error',
@@ -290,6 +311,7 @@
               headers: {
                 'RaiseHtmlError': false,
                 'Accept': 'application/vnd.conekta-v0.3.0+json',
+                'Accept-Language': Conekta.getLanguage(),
                 'Conekta-Client-User-Agent': '{"agent":"Conekta JavascriptBindings/0.3.0"}',
                 'Authorization': 'Basic ' + Base64.encode(Conekta.getPublishableKey() + ':')
               },
@@ -298,7 +320,7 @@
             });
           } else {
             rpc = new easyXDM.Rpc({
-              swf: "https://conektaapi.s3.amazonaws.com/v0.3.1/flash/easyxdm.swf",
+              swf: "https://conektaapi.s3.amazonaws.com/v0.3.2/flash/easyxdm.swf",
               remote: base_url + "easyxdm_cors_proxy.html"
             }, {
               remote: {
@@ -311,6 +333,7 @@
               headers: {
                 'RaiseHtmlError': false,
                 'Accept': 'application/vnd.conekta-v0.3.0+json',
+                'Accept-Language': Conekta.getLanguage(),
                 'Conekta-Client-User-Agent': '{"agent":"Conekta JavascriptBindings/0.3.0"}',
                 'Authorization': 'Basic ' + Base64.encode(Conekta.getPublishableKey() + ':')
               },
@@ -341,18 +364,26 @@
       failure_callback = Conekta._helpers.log;
     }
     charge = Conekta._helpers.parseForm(charge_form);
-    charge.session_id = Conekta._helpers.getSessionId();
-    if (charge.card && charge.card.address && !(charge.card.address.street1 || charge.card.address.street2 || charge.card.address.street3 || charge.card.address.city || charge.card.address.state || charge.card.address.country || charge.card.address.zip)) {
-      delete charge.card.address;
-    }
     if (typeof charge === 'object') {
-      return Conekta._helpers.xDomainPost({
-        jsonp_url: 'charges/create',
-        url: 'charges',
-        data: charge,
-        success: success_callback,
-        error: failure_callback
-      });
+      if (Conekta._helpers.objectKeys(charge).length > 0) {
+        charge.session_id = Conekta._helpers.getSessionId();
+        if (charge.card && charge.card.address && !(charge.card.address.street1 || charge.card.address.street2 || charge.card.address.street3 || charge.card.address.city || charge.card.address.state || charge.card.address.country || charge.card.address.zip)) {
+          delete charge.card.address;
+        }
+        return Conekta._helpers.xDomainPost({
+          jsonp_url: 'charges/create',
+          url: 'charges',
+          data: charge,
+          success: success_callback,
+          error: failure_callback
+        });
+      } else {
+        return failure_callback({
+          'object': 'error',
+          'type': 'invalid_request_error',
+          'message': "Supplied parameter 'charge' is usable object but has no values (e.g. amount, description) associated with it"
+        });
+      }
     } else {
       return failure_callback({
         'object': 'error',
@@ -521,7 +552,7 @@
     month = parseMonth(exp_month);
     year = parseYear(exp_year);
     if ((typeof month === 'number' && month > 0 && month < 13) && (typeof year === 'number' && year > 2013 && year < 2035)) {
-      return Date.parse(month + '/' + new Date(year, month, 0).getDate() + '/' + year) > Date.now();
+      return (new Date(year, month, new Date(year, month, 0).getDate())) > (new Date());
     } else {
       return false;
     }
@@ -568,26 +599,34 @@
       failure_callback = Conekta._helpers.log;
     }
     token = Conekta._helpers.parseForm(token_form);
-    if (token.card) {
-      token.card.device_fingerprint = Conekta._helpers.getSessionId();
-    } else {
-      failure_callback({
-        'object': 'error',
-        'type': 'invalid_request_error',
-        'message': "The form or hash has no attributes 'card'.  If you are using a form, please ensure that you have have an input or text area with the data-conekta attribute 'card[number]'.  For an example form see: https://github.com/conekta/conekta.js/blob/master/examples/credit_card.html"
-      });
-    }
-    if (token.card && token.card.address && !(token.card.address.street1 || token.card.address.street2 || token.card.address.street3 || token.card.address.city || token.card.address.state || token.card.address.country || token.card.address.zip)) {
-      delete token.card.address;
-    }
     if (typeof token === 'object') {
-      return Conekta._helpers.xDomainPost({
-        jsonp_url: 'tokens/create',
-        url: 'tokens',
-        data: token,
-        success: success_callback,
-        error: failure_callback
-      });
+      if (Conekta._helpers.objectKeys(token).length > 0) {
+        if (token.card) {
+          token.card.device_fingerprint = Conekta._helpers.getSessionId();
+        } else {
+          failure_callback({
+            'object': 'error',
+            'type': 'invalid_request_error',
+            'message': "The form or hash has no attributes 'card'.  If you are using a form, please ensure that you have have an input or text area with the data-conekta attribute 'card[number]'.  For an example form see: https://github.com/conekta/conekta.js/blob/master/examples/credit_card.html"
+          });
+        }
+        if (token.card && token.card.address && !(token.card.address.street1 || token.card.address.street2 || token.card.address.street3 || token.card.address.city || token.card.address.state || token.card.address.country || token.card.address.zip)) {
+          delete token.card.address;
+        }
+        return Conekta._helpers.xDomainPost({
+          jsonp_url: 'tokens/create',
+          url: 'tokens',
+          data: token,
+          success: success_callback,
+          error: failure_callback
+        });
+      } else {
+        return failure_callback({
+          'object': 'error',
+          'type': 'invalid_request_error',
+          'message': "supplied parameter 'token' is usable object but has no values (e.g. amount, description) associated with it"
+        });
+      }
     } else {
       return failure_callback({
         'object': 'error',
