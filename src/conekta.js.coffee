@@ -2,56 +2,48 @@ base_url = 'https://api.conekta.io/'
 publishable_key = null
 session_id = ""
 _language = 'es'
+merchant_id = ''
 
-useable_characters = "abcdefghijklmnopqrstuvwxyz0123456789"
-for i in [0..30]
-  session_id += useable_characters.charAt(Math.floor(Math.random() * 36))
+if localStorage and localStorage.getItem and localStorage.getItem('_conekta_session_id')
+  session_id = localStorage.getItem('_conekta_session_id')
+else
+  useable_characters = "abcdefghijklmnopqrstuvwxyz0123456789"
+  if crypto and crypto.getRandomValues
+    random_value_array = Uint32Array(32)
+    crypto.getRandomValues(random_value_array)
+    for i in [0..random_value_array.length]
+      session_id += useable_characters.charAt(random_value_array[i] % 36)
+  else
+    for i in [0..30]
+      random_index = Math.floor(Math.random() * 36)
+      session_id += useable_characters.charAt(random_index)
 
 fingerprint = ->
   if typeof document != 'undefined' and typeof document.body != 'undefined' and document.body and (document.readyState == 'interactive' or document.readyState == 'complete')
     body = document.getElementsByTagName('body')[0]
 
     #fingerprinting png
-    fingerprint_png_p = document.createElement('p')
-    fingerprint_png_p.setAttribute("style", "background:url(https://h.online-metrix.net/fp/clear.png?org_id=k8vif92e&session_id=banorteixe_conekta" + session_id + "&m=1) ! important; display:none ! important;")
-    body.appendChild(fingerprint_png_p)
+    iframe = document.createElement('iframe')
+    iframe.setAttribute("height", "1")
+    iframe.setAttribute("scrolling", "no")
+    iframe.setAttribute("frameborder", "0")
+    iframe.setAttribute("width", "1")
+    iframe.setAttribute("src", "#{base_url}logo.htm?m=#{merchant_id}&s=#{session_id}")
 
-    fingerprint_png_img = document.createElement('img')
-    fingerprint_png_img.setAttribute('style', 'display:none ! important;')
-    fingerprint_png_img.src = "https://h.online-metrix.net/fp/clear.png?org_id=k8vif92e&session_id=banorteixe_conekta" + session_id + "&m=2"
-    body.appendChild(fingerprint_png_img)
+    image = document.createElement('img')
+    image.setAttribute("height", "1")
+    image.setAttribute("width", "1")
+    image.setAttribute("src", "#{base_url}logo.gif?m=#{merchant_id}&s=#{session_id}")
 
-    #fingerprinting swf
-    add_swf = ->
-      fingerprint_swf_object = document.createElement('object')
-      fingerprint_swf_object.type = 'application/x-shockwave-flash'
-      fingerprint_swf_object.data = "https://h.online-metrix.net/fp/fp.swf?org_id=k8vif92e&session_id=banorteixe_conekta" + session_id
-      fingerprint_swf_object.width = '1'
-      fingerprint_swf_object.setAttribute('style', 'display:none ! important;')
-      body.appendChild(fingerprint_swf_object)
+    try
+      iframe.appendChild(image)
+    catch e
+      #do nothing
 
-      fingerprint_swf_param = document.createElement('param')
-      fingerprint_swf_param.name = 'movie'
-      fingerprint_swf_param.setAttribute('style', 'display:none ! important;')
-      fingerprint_swf_param.value = 'https://h.online-metrix.net/fp/fp.swf?org_id=k8vif92e&session_id=merchant' + session_id
-      if typeof fingerprint_swf_param.appendChild == 'function'
-        fingerprint_swf_param.appendChild(document.createElement('div'))
-      body.appendChild(fingerprint_swf_param)
-
-      return
-
-    if window.attachEvent
-      window.attachEvent("onload", add_swf)
-    else if window.addEventListener
-      window.addEventListener("load", add_swf, false)
-
-    #fingerprinting script
-    fingerprint_script = document.createElement('script')
-    fingerprint_script.type = 'text/javascript'
-    fingerprint_script.src = 'https://h.online-metrix.net/fp/check.js?org_id=k8vif92e&session_id=banorteixe_conekta' + session_id
-    body.appendChild(fingerprint_script)
+    body.appendChild(iframe)
   else
     setTimeout(fingerprint, 150)
+
   return
 
 fingerprint()
@@ -86,7 +78,7 @@ Base64 =
       output = output + Base64._keyStr.charAt(enc1) + Base64._keyStr.charAt(enc2) + Base64._keyStr.charAt(enc3) + Base64._keyStr.charAt(enc4)
     output
 
-  
+
   # public method for decoding
   decode: (input) ->
     output = ""
@@ -113,7 +105,7 @@ Base64 =
     output = Base64._utf8_decode(output)
     output
 
-  
+
   # private method for UTF-8 encoding
   _utf8_encode: (string) ->
     string = string.replace(/\r\n/g, "\n")
@@ -134,7 +126,7 @@ Base64 =
       n++
     utftext
 
-  
+
   # private method for UTF-8 decoding
   _utf8_decode: (utftext) ->
     string = ""

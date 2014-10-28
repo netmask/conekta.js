@@ -3252,7 +3252,7 @@ module.exports = function(val){
 */
 
 (function() {
-  var Base64, base_url, fingerprint, i, publishable_key, session_id, useable_characters, _i, _language;
+  var Base64, base_url, fingerprint, i, merchant_id, publishable_key, random_index, random_value_array, session_id, useable_characters, _i, _j, _language, _ref;
 
   base_url = 'https://api.conekta.io/';
 
@@ -3262,49 +3262,46 @@ module.exports = function(val){
 
   _language = 'es';
 
-  useable_characters = "abcdefghijklmnopqrstuvwxyz0123456789";
+  merchant_id = '';
 
-  for (i = _i = 0; _i <= 30; i = ++_i) {
-    session_id += useable_characters.charAt(Math.floor(Math.random() * 36));
+  if (localStorage && localStorage.getItem && localStorage.getItem('_conekta_session_id')) {
+    session_id = localStorage.getItem('_conekta_session_id');
+  } else {
+    useable_characters = "abcdefghijklmnopqrstuvwxyz0123456789";
+    if (crypto && crypto.getRandomValues) {
+      random_value_array = Uint32Array(32);
+      crypto.getRandomValues(random_value_array);
+      for (i = _i = 0, _ref = random_value_array.length; 0 <= _ref ? _i <= _ref : _i >= _ref; i = 0 <= _ref ? ++_i : --_i) {
+        session_id += useable_characters.charAt(random_value_array[i] % 36);
+      }
+    } else {
+      for (i = _j = 0; _j <= 30; i = ++_j) {
+        random_index = Math.floor(Math.random() * 36);
+        session_id += useable_characters.charAt(random_index);
+      }
+    }
   }
 
   fingerprint = function() {
-    var add_swf, body, fingerprint_png_img, fingerprint_png_p, fingerprint_script;
+    var body, e, iframe, image;
     if (typeof document !== 'undefined' && typeof document.body !== 'undefined' && document.body && (document.readyState === 'interactive' || document.readyState === 'complete')) {
       body = document.getElementsByTagName('body')[0];
-      fingerprint_png_p = document.createElement('p');
-      fingerprint_png_p.setAttribute("style", "background:url(https://h.online-metrix.net/fp/clear.png?org_id=k8vif92e&session_id=banorteixe_conekta" + session_id + "&m=1) ! important; display:none ! important;");
-      body.appendChild(fingerprint_png_p);
-      fingerprint_png_img = document.createElement('img');
-      fingerprint_png_img.setAttribute('style', 'display:none ! important;');
-      fingerprint_png_img.src = "https://h.online-metrix.net/fp/clear.png?org_id=k8vif92e&session_id=banorteixe_conekta" + session_id + "&m=2";
-      body.appendChild(fingerprint_png_img);
-      add_swf = function() {
-        var fingerprint_swf_object, fingerprint_swf_param;
-        fingerprint_swf_object = document.createElement('object');
-        fingerprint_swf_object.type = 'application/x-shockwave-flash';
-        fingerprint_swf_object.data = "https://h.online-metrix.net/fp/fp.swf?org_id=k8vif92e&session_id=banorteixe_conekta" + session_id;
-        fingerprint_swf_object.width = '1';
-        fingerprint_swf_object.setAttribute('style', 'display:none ! important;');
-        body.appendChild(fingerprint_swf_object);
-        fingerprint_swf_param = document.createElement('param');
-        fingerprint_swf_param.name = 'movie';
-        fingerprint_swf_param.setAttribute('style', 'display:none ! important;');
-        fingerprint_swf_param.value = 'https://h.online-metrix.net/fp/fp.swf?org_id=k8vif92e&session_id=merchant' + session_id;
-        if (typeof fingerprint_swf_param.appendChild === 'function') {
-          fingerprint_swf_param.appendChild(document.createElement('div'));
-        }
-        body.appendChild(fingerprint_swf_param);
-      };
-      if (window.attachEvent) {
-        window.attachEvent("onload", add_swf);
-      } else if (window.addEventListener) {
-        window.addEventListener("load", add_swf, false);
+      iframe = document.createElement('iframe');
+      iframe.setAttribute("height", "1");
+      iframe.setAttribute("scrolling", "no");
+      iframe.setAttribute("frameborder", "0");
+      iframe.setAttribute("width", "1");
+      iframe.setAttribute("src", "" + base_url + "logo.htm?m=" + merchant_id + "&s=" + session_id);
+      image = document.createElement('img');
+      image.setAttribute("height", "1");
+      image.setAttribute("width", "1");
+      image.setAttribute("src", "" + base_url + "logo.gif?m=" + merchant_id + "&s=" + session_id);
+      try {
+        iframe.appendChild(image);
+      } catch (_error) {
+        e = _error;
       }
-      fingerprint_script = document.createElement('script');
-      fingerprint_script.type = 'text/javascript';
-      fingerprint_script.src = 'https://h.online-metrix.net/fp/check.js?org_id=k8vif92e&session_id=banorteixe_conekta' + session_id;
-      body.appendChild(fingerprint_script);
+      body.appendChild(iframe);
     } else {
       setTimeout(fingerprint, 150);
     }
@@ -3451,7 +3448,7 @@ module.exports = function(val){
         return keys;
       },
       parseForm: function(charge_form) {
-        var all_inputs, attribute, attribute_name, attributes, charge, input, inputs, key, last_attribute, line_items, node, parent_node, selects, textareas, val, _j, _k, _l, _len, _len1, _m, _n, _ref, _ref1, _ref2;
+        var all_inputs, attribute, attribute_name, attributes, charge, input, inputs, key, last_attribute, line_items, node, parent_node, selects, textareas, val, _k, _l, _len, _len1, _m, _n, _o, _ref1, _ref2, _ref3;
         charge = {};
         if (typeof charge_form === 'object') {
           if (typeof jQuery !== 'undefined' && (charge_form instanceof jQuery || 'jquery' in Object(charge_form))) {
@@ -3465,17 +3462,17 @@ module.exports = function(val){
             inputs = charge_form.getElementsByTagName('input');
             selects = charge_form.getElementsByTagName('select');
             all_inputs = new Array(textareas.length + inputs.length + selects.length);
-            for (i = _j = 0, _ref = textareas.length - 1; _j <= _ref; i = _j += 1) {
+            for (i = _k = 0, _ref1 = textareas.length - 1; _k <= _ref1; i = _k += 1) {
               all_inputs[i] = textareas[i];
             }
-            for (i = _k = 0, _ref1 = inputs.length - 1; _k <= _ref1; i = _k += 1) {
+            for (i = _l = 0, _ref2 = inputs.length - 1; _l <= _ref2; i = _l += 1) {
               all_inputs[i + textareas.length] = inputs[i];
             }
-            for (i = _l = 0, _ref2 = selects.length - 1; _l <= _ref2; i = _l += 1) {
+            for (i = _m = 0, _ref3 = selects.length - 1; _m <= _ref3; i = _m += 1) {
               all_inputs[i + textareas.length + inputs.length] = selects[i];
             }
-            for (_m = 0, _len = all_inputs.length; _m < _len; _m++) {
-              input = all_inputs[_m];
+            for (_n = 0, _len = all_inputs.length; _n < _len; _n++) {
+              input = all_inputs[_n];
               if (input) {
                 attribute_name = input.getAttribute('data-conekta');
                 if (attribute_name) {
@@ -3488,8 +3485,8 @@ module.exports = function(val){
                   parent_node = null;
                   node = charge;
                   last_attribute = null;
-                  for (_n = 0, _len1 = attributes.length; _n < _len1; _n++) {
-                    attribute = attributes[_n];
+                  for (_o = 0, _len1 = attributes.length; _o < _len1; _o++) {
+                    attribute = attributes[_o];
                     if (!node[attribute]) {
                       node[attribute] = {};
                     }
