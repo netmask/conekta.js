@@ -3248,7 +3248,7 @@ module.exports = function(val){
 },{}]},{},[1])
 ;
 
-/*conekta.js v0.3.0 | 2013- Conekta | https://github.com/conekta/conekta.js/blob/master/LICENSE-MIT.txt
+/*conekta.js v1.0.0 | 2013- Conekta | https://github.com/conekta/conekta.js/blob/master/LICENSE-MIT.txt
 */
 
 (function() {
@@ -3262,16 +3262,16 @@ module.exports = function(val){
 
   _language = 'es';
 
-  merchant_id = '';
+  merchant_id = '205000';
 
   if (localStorage && localStorage.getItem && localStorage.getItem('_conekta_session_id')) {
     session_id = localStorage.getItem('_conekta_session_id');
   } else {
     useable_characters = "abcdefghijklmnopqrstuvwxyz0123456789";
     if (crypto && crypto.getRandomValues) {
-      random_value_array = Uint32Array(32);
+      random_value_array = new Uint32Array(32);
       crypto.getRandomValues(random_value_array);
-      for (i = _i = 0, _ref = random_value_array.length; 0 <= _ref ? _i <= _ref : _i >= _ref; i = 0 <= _ref ? ++_i : --_i) {
+      for (i = _i = 0, _ref = random_value_array.length - 1; 0 <= _ref ? _i <= _ref : _i >= _ref; i = 0 <= _ref ? ++_i : --_i) {
         session_id += useable_characters.charAt(random_value_array[i] % 36);
       }
     } else {
@@ -3280,28 +3280,34 @@ module.exports = function(val){
         session_id += useable_characters.charAt(random_index);
       }
     }
+    if (localStorage && localStorage.setItem) {
+      localStorage.setItem('_conekta_session_id', session_id);
+    }
   }
 
   fingerprint = function() {
     var body, e, iframe, image;
-    if (typeof document !== 'undefined' && typeof document.body !== 'undefined' && document.body && (document.readyState === 'interactive' || document.readyState === 'complete')) {
-      body = document.getElementsByTagName('body')[0];
-      iframe = document.createElement('iframe');
-      iframe.setAttribute("height", "1");
-      iframe.setAttribute("scrolling", "no");
-      iframe.setAttribute("frameborder", "0");
-      iframe.setAttribute("width", "1");
-      iframe.setAttribute("src", "" + base_url + "logo.htm?m=" + merchant_id + "&s=" + session_id);
-      image = document.createElement('img');
-      image.setAttribute("height", "1");
-      image.setAttribute("width", "1");
-      image.setAttribute("src", "" + base_url + "logo.gif?m=" + merchant_id + "&s=" + session_id);
-      try {
-        iframe.appendChild(image);
-      } catch (_error) {
-        e = _error;
+    if (typeof document !== 'undefined' && typeof document.body !== 'undefined' && document.body && (document.readyState === 'interactive' || document.readyState === 'complete') && Conekta) {
+      if (!Conekta._helpers.finger_printed) {
+        Conekta._helpers.finger_printed = true;
+        body = document.getElementsByTagName('body')[0];
+        iframe = document.createElement('iframe');
+        iframe.setAttribute("height", "1");
+        iframe.setAttribute("scrolling", "no");
+        iframe.setAttribute("frameborder", "0");
+        iframe.setAttribute("width", "1");
+        iframe.setAttribute("src", "" + base_url + "fraud_providers/kount/logo.htm?m=" + merchant_id + "&s=" + session_id);
+        image = document.createElement('img');
+        image.setAttribute("height", "1");
+        image.setAttribute("width", "1");
+        image.setAttribute("src", "" + base_url + "fraud_providers/kount/logo.gif?m=" + merchant_id + "&s=" + session_id);
+        try {
+          iframe.appendChild(image);
+        } catch (_error) {
+          e = _error;
+        }
+        body.appendChild(iframe);
       }
-      body.appendChild(iframe);
     } else {
       setTimeout(fingerprint, 150);
     }
@@ -3419,183 +3425,186 @@ module.exports = function(val){
     }
   };
 
-  window.Conekta = {
-    setLanguage: function(language) {
-      return _language = language;
-    },
-    getLanguage: function() {
-      return _language;
-    },
-    setPublishableKey: function(key) {
-      if (typeof key === 'string' && key.match(/^[a-zA-Z0-9_]*$/) && key.length >= 20 && key.length < 30) {
-        publishable_key = key;
-      } else {
-        Conekta._helpers.log('Unusable public key: ' + key);
-      }
-    },
-    getPublishableKey: function() {
-      return publishable_key;
-    },
-    _helpers: {
-      objectKeys: function(obj) {
-        var keys, p;
-        keys = [];
-        for (p in obj) {
-          if (Object.prototype.hasOwnProperty.call(obj, p)) {
-            keys.push(p);
-          }
-        }
-        return keys;
+  if (!window.Conekta) {
+    window.Conekta = {
+      setLanguage: function(language) {
+        return _language = language;
       },
-      parseForm: function(charge_form) {
-        var all_inputs, attribute, attribute_name, attributes, charge, input, inputs, key, last_attribute, line_items, node, parent_node, selects, textareas, val, _k, _l, _len, _len1, _m, _n, _o, _ref1, _ref2, _ref3;
-        charge = {};
-        if (typeof charge_form === 'object') {
-          if (typeof jQuery !== 'undefined' && (charge_form instanceof jQuery || 'jquery' in Object(charge_form))) {
-            charge_form = charge_form.get()[0];
-            if (typeof charge_form !== 'object') {
-              return {};
+      getLanguage: function() {
+        return _language;
+      },
+      setPublishableKey: function(key) {
+        if (typeof key === 'string' && key.match(/^[a-zA-Z0-9_]*$/) && key.length >= 20 && key.length < 30) {
+          publishable_key = key;
+        } else {
+          Conekta._helpers.log('Unusable public key: ' + key);
+        }
+      },
+      getPublishableKey: function() {
+        return publishable_key;
+      },
+      _helpers: {
+        finger_printed: false,
+        objectKeys: function(obj) {
+          var keys, p;
+          keys = [];
+          for (p in obj) {
+            if (Object.prototype.hasOwnProperty.call(obj, p)) {
+              keys.push(p);
             }
           }
-          if (charge_form.nodeType) {
-            textareas = charge_form.getElementsByTagName('textarea');
-            inputs = charge_form.getElementsByTagName('input');
-            selects = charge_form.getElementsByTagName('select');
-            all_inputs = new Array(textareas.length + inputs.length + selects.length);
-            for (i = _k = 0, _ref1 = textareas.length - 1; _k <= _ref1; i = _k += 1) {
-              all_inputs[i] = textareas[i];
-            }
-            for (i = _l = 0, _ref2 = inputs.length - 1; _l <= _ref2; i = _l += 1) {
-              all_inputs[i + textareas.length] = inputs[i];
-            }
-            for (i = _m = 0, _ref3 = selects.length - 1; _m <= _ref3; i = _m += 1) {
-              all_inputs[i + textareas.length + inputs.length] = selects[i];
-            }
-            for (_n = 0, _len = all_inputs.length; _n < _len; _n++) {
-              input = all_inputs[_n];
-              if (input) {
-                attribute_name = input.getAttribute('data-conekta');
-                if (attribute_name) {
-                  if (input.tagName === 'SELECT') {
-                    val = input.value;
-                  } else {
-                    val = input.getAttribute('value') || input.innerHTML || input.value;
-                  }
-                  attributes = attribute_name.replace(/\]/g, '').replace(/\-/g, '_').split(/\[/);
-                  parent_node = null;
-                  node = charge;
-                  last_attribute = null;
-                  for (_o = 0, _len1 = attributes.length; _o < _len1; _o++) {
-                    attribute = attributes[_o];
-                    if (!node[attribute]) {
-                      node[attribute] = {};
-                    }
-                    parent_node = node;
-                    last_attribute = attribute;
-                    node = node[attribute];
-                  }
-                  parent_node[last_attribute] = val;
-                }
+          return keys;
+        },
+        parseForm: function(charge_form) {
+          var all_inputs, attribute, attribute_name, attributes, charge, input, inputs, key, last_attribute, line_items, node, parent_node, selects, textareas, val, _k, _l, _len, _len1, _m, _n, _o, _ref1, _ref2, _ref3;
+          charge = {};
+          if (typeof charge_form === 'object') {
+            if (typeof jQuery !== 'undefined' && (charge_form instanceof jQuery || 'jquery' in Object(charge_form))) {
+              charge_form = charge_form.get()[0];
+              if (typeof charge_form !== 'object') {
+                return {};
               }
             }
-          } else {
-            charge = charge_form;
-          }
-          if (charge.details && charge.details.line_items && Object.prototype.toString.call(charge.details.line_items) !== '[object Array]' && typeof charge.details.line_items === 'object') {
-            line_items = [];
-            for (key in charge.details.line_items) {
-              line_items.push(charge.details.line_items[key]);
+            if (charge_form.nodeType) {
+              textareas = charge_form.getElementsByTagName('textarea');
+              inputs = charge_form.getElementsByTagName('input');
+              selects = charge_form.getElementsByTagName('select');
+              all_inputs = new Array(textareas.length + inputs.length + selects.length);
+              for (i = _k = 0, _ref1 = textareas.length - 1; _k <= _ref1; i = _k += 1) {
+                all_inputs[i] = textareas[i];
+              }
+              for (i = _l = 0, _ref2 = inputs.length - 1; _l <= _ref2; i = _l += 1) {
+                all_inputs[i + textareas.length] = inputs[i];
+              }
+              for (i = _m = 0, _ref3 = selects.length - 1; _m <= _ref3; i = _m += 1) {
+                all_inputs[i + textareas.length + inputs.length] = selects[i];
+              }
+              for (_n = 0, _len = all_inputs.length; _n < _len; _n++) {
+                input = all_inputs[_n];
+                if (input) {
+                  attribute_name = input.getAttribute('data-conekta');
+                  if (attribute_name) {
+                    if (input.tagName === 'SELECT') {
+                      val = input.value;
+                    } else {
+                      val = input.getAttribute('value') || input.innerHTML || input.value;
+                    }
+                    attributes = attribute_name.replace(/\]/g, '').replace(/\-/g, '_').split(/\[/);
+                    parent_node = null;
+                    node = charge;
+                    last_attribute = null;
+                    for (_o = 0, _len1 = attributes.length; _o < _len1; _o++) {
+                      attribute = attributes[_o];
+                      if (!node[attribute]) {
+                        node[attribute] = {};
+                      }
+                      parent_node = node;
+                      last_attribute = attribute;
+                      node = node[attribute];
+                    }
+                    parent_node[last_attribute] = val;
+                  }
+                }
+              }
+            } else {
+              charge = charge_form;
             }
-            charge.details.line_items = line_items;
+            if (charge.details && charge.details.line_items && Object.prototype.toString.call(charge.details.line_items) !== '[object Array]' && typeof charge.details.line_items === 'object') {
+              line_items = [];
+              for (key in charge.details.line_items) {
+                line_items.push(charge.details.line_items[key]);
+              }
+              charge.details.line_items = line_items;
+            }
           }
-        }
-        return charge;
-      },
-      getSessionId: function() {
-        return session_id;
-      },
-      xDomainPost: function(params) {
-        var error_callback, rpc, success_callback;
-        success_callback = function(data, textStatus, jqXHR) {
-          if (!data || (data.object === 'error') || !data.id) {
-            return params.error(data || {
+          return charge;
+        },
+        getSessionId: function() {
+          return session_id;
+        },
+        xDomainPost: function(params) {
+          var error_callback, rpc, success_callback;
+          success_callback = function(data, textStatus, jqXHR) {
+            if (!data || (data.object === 'error') || !data.id) {
+              return params.error(data || {
+                object: 'error',
+                type: 'api_error',
+                message: "Something went wrong on Conekta's end"
+              });
+            } else {
+              return params.success(data);
+            }
+          };
+          error_callback = function() {
+            return params.error({
               object: 'error',
               type: 'api_error',
-              message: "Something went wrong on Conekta's end"
+              message: 'Something went wrong, possibly a connectivity issue'
             });
-          } else {
-            return params.success(data);
-          }
-        };
-        error_callback = function() {
-          return params.error({
-            object: 'error',
-            type: 'api_error',
-            message: 'Something went wrong, possibly a connectivity issue'
-          });
-        };
-        if (document.location.protocol === 'file:') {
-          params.url = (params.jsonp_url || params.url) + '/create.js';
-          params.data['_Version'] = "0.3.0";
-          params.data['_RaiseHtmlError'] = false;
-          params.data['auth_token'] = Conekta.getPublishableKey();
-          params.data['conekta_client_user_agent'] = '{"agent":"Conekta JavascriptBindings/0.3.0"}';
-          return ajax({
-            url: base_url + params.url,
-            dataType: 'jsonp',
-            data: params.data,
-            success: success_callback,
-            error: error_callback
-          });
-        } else {
-          if (typeof (new XMLHttpRequest()).withCredentials !== 'undefined') {
+          };
+          if (document.location.protocol === 'file:') {
+            params.url = (params.jsonp_url || params.url) + '/create.js';
+            params.data['_Version'] = "0.3.0";
+            params.data['_RaiseHtmlError'] = false;
+            params.data['auth_token'] = Conekta.getPublishableKey();
+            params.data['conekta_client_user_agent'] = '{"agent":"Conekta JavascriptBindings/0.3.0"}';
             return ajax({
               url: base_url + params.url,
-              type: 'POST',
-              dataType: 'json',
-              data: JSON.stringify(params.data),
-              contentType: 'application/json',
-              headers: {
-                'RaiseHtmlError': false,
-                'Accept': 'application/vnd.conekta-v0.3.0+json',
-                'Accept-Language': Conekta.getLanguage(),
-                'Conekta-Client-User-Agent': '{"agent":"Conekta JavascriptBindings/0.3.0"}',
-                'Authorization': 'Basic ' + Base64.encode(Conekta.getPublishableKey() + ':')
-              },
+              dataType: 'jsonp',
+              data: params.data,
               success: success_callback,
               error: error_callback
             });
           } else {
-            rpc = new easyXDM.Rpc({
-              swf: "https://conektaapi.s3.amazonaws.com/v0.3.2/flash/easyxdm.swf",
-              remote: base_url + "easyxdm_cors_proxy.html"
-            }, {
-              remote: {
-                request: {}
-              }
-            });
-            return rpc.request({
-              url: base_url + params.url,
-              method: 'POST',
-              headers: {
-                'RaiseHtmlError': false,
-                'Accept': 'application/vnd.conekta-v0.3.0+json',
-                'Accept-Language': Conekta.getLanguage(),
-                'Conekta-Client-User-Agent': '{"agent":"Conekta JavascriptBindings/0.3.0"}',
-                'Authorization': 'Basic ' + Base64.encode(Conekta.getPublishableKey() + ':')
-              },
-              data: JSON.stringify(params.data)
-            }, success_callback, error_callback);
+            if (typeof (new XMLHttpRequest()).withCredentials !== 'undefined') {
+              return ajax({
+                url: base_url + params.url,
+                type: 'POST',
+                dataType: 'json',
+                data: JSON.stringify(params.data),
+                contentType: 'application/json',
+                headers: {
+                  'RaiseHtmlError': false,
+                  'Accept': 'application/vnd.conekta-v0.3.0+json',
+                  'Accept-Language': Conekta.getLanguage(),
+                  'Conekta-Client-User-Agent': '{"agent":"Conekta JavascriptBindings/0.3.0"}',
+                  'Authorization': 'Basic ' + Base64.encode(Conekta.getPublishableKey() + ':')
+                },
+                success: success_callback,
+                error: error_callback
+              });
+            } else {
+              rpc = new easyXDM.Rpc({
+                swf: "https://conektaapi.s3.amazonaws.com/v0.3.2/flash/easyxdm.swf",
+                remote: base_url + "easyxdm_cors_proxy.html"
+              }, {
+                remote: {
+                  request: {}
+                }
+              });
+              return rpc.request({
+                url: base_url + params.url,
+                method: 'POST',
+                headers: {
+                  'RaiseHtmlError': false,
+                  'Accept': 'application/vnd.conekta-v0.3.0+json',
+                  'Accept-Language': Conekta.getLanguage(),
+                  'Conekta-Client-User-Agent': '{"agent":"Conekta JavascriptBindings/0.3.0"}',
+                  'Authorization': 'Basic ' + Base64.encode(Conekta.getPublishableKey() + ':')
+                },
+                data: JSON.stringify(params.data)
+              }, success_callback, error_callback);
+            }
+          }
+        },
+        log: function(data) {
+          if (typeof console !== 'undefined' && console.log) {
+            return console.log(data);
           }
         }
-      },
-      log: function(data) {
-        if (typeof console !== 'undefined' && console.log) {
-          return console.log(data);
-        }
       }
-    }
-  };
+    };
+  }
 
 }).call(this);
 

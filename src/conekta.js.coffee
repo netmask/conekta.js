@@ -1,46 +1,51 @@
-base_url = 'https://api.conekta.io/'
+base_url = 'https://api.conekta.io/' #'https://api.conekta.io/'
 publishable_key = null
 session_id = ""
 _language = 'es'
-merchant_id = ''
+merchant_id = '205000'
 
 if localStorage and localStorage.getItem and localStorage.getItem('_conekta_session_id')
   session_id = localStorage.getItem('_conekta_session_id')
 else
   useable_characters = "abcdefghijklmnopqrstuvwxyz0123456789"
   if crypto and crypto.getRandomValues
-    random_value_array = Uint32Array(32)
+    random_value_array = new Uint32Array(32)
     crypto.getRandomValues(random_value_array)
-    for i in [0..random_value_array.length]
+    for i in [0..random_value_array.length-1]
       session_id += useable_characters.charAt(random_value_array[i] % 36)
   else
     for i in [0..30]
       random_index = Math.floor(Math.random() * 36)
       session_id += useable_characters.charAt(random_index)
+  if localStorage and localStorage.setItem
+    localStorage.setItem('_conekta_session_id', session_id)
 
 fingerprint = ->
-  if typeof document != 'undefined' and typeof document.body != 'undefined' and document.body and (document.readyState == 'interactive' or document.readyState == 'complete')
-    body = document.getElementsByTagName('body')[0]
+  if typeof document != 'undefined' and typeof document.body != 'undefined' and document.body and (document.readyState == 'interactive' or document.readyState == 'complete') and Conekta
+    if ! Conekta._helpers.finger_printed
+      Conekta._helpers.finger_printed = true
 
-    #fingerprinting png
-    iframe = document.createElement('iframe')
-    iframe.setAttribute("height", "1")
-    iframe.setAttribute("scrolling", "no")
-    iframe.setAttribute("frameborder", "0")
-    iframe.setAttribute("width", "1")
-    iframe.setAttribute("src", "#{base_url}logo.htm?m=#{merchant_id}&s=#{session_id}")
+      body = document.getElementsByTagName('body')[0]
 
-    image = document.createElement('img')
-    image.setAttribute("height", "1")
-    image.setAttribute("width", "1")
-    image.setAttribute("src", "#{base_url}logo.gif?m=#{merchant_id}&s=#{session_id}")
+      #fingerprinting png
+      iframe = document.createElement('iframe')
+      iframe.setAttribute("height", "1")
+      iframe.setAttribute("scrolling", "no")
+      iframe.setAttribute("frameborder", "0")
+      iframe.setAttribute("width", "1")
+      iframe.setAttribute("src", "#{base_url}fraud_providers/kount/logo.htm?m=#{merchant_id}&s=#{session_id}")
 
-    try
-      iframe.appendChild(image)
-    catch e
-      #do nothing
+      image = document.createElement('img')
+      image.setAttribute("height", "1")
+      image.setAttribute("width", "1")
+      image.setAttribute("src", "#{base_url}fraud_providers/kount/logo.gif?m=#{merchant_id}&s=#{session_id}")
 
-    body.appendChild(iframe)
+      try
+        iframe.appendChild(image)
+      catch e
+        #do nothing
+
+      body.appendChild(iframe)
   else
     setTimeout(fingerprint, 150)
 
@@ -148,163 +153,164 @@ Base64 =
         i += 3
     string
 
-window.Conekta = 
-  setLanguage: (language)->
-    _language = language
+if ! window.Conekta
+  window.Conekta = 
+    setLanguage: (language)->
+      _language = language
 
-  getLanguage: ()->
-    _language
+    getLanguage: ()->
+      _language
 
-  setPublishableKey: (key)->
-    if typeof key == 'string' and key.match(/^[a-zA-Z0-9_]*$/) and key.length >= 20 and key.length < 30
-      publishable_key = key
-    else
-      Conekta._helpers.log('Unusable public key: ' + key)
-    return
+    setPublishableKey: (key)->
+      if typeof key == 'string' and key.match(/^[a-zA-Z0-9_]*$/) and key.length >= 20 and key.length < 30
+        publishable_key = key
+      else
+        Conekta._helpers.log('Unusable public key: ' + key)
+      return
 
-  getPublishableKey: ()->
-    publishable_key
+    getPublishableKey: ()->
+      publishable_key
 
-  _helpers:
-    objectKeys:(obj)->
-      keys = []
-      for p of obj
-        if Object.prototype.hasOwnProperty.call(obj,p)
-          keys.push(p)
-      return keys
+    _helpers:
+      finger_printed: false
+      objectKeys:(obj)->
+        keys = []
+        for p of obj
+          if Object.prototype.hasOwnProperty.call(obj,p)
+            keys.push(p)
+        return keys
 
-    parseForm:(charge_form)->
-      charge = {}
-      if typeof charge_form == 'object'
-        if typeof jQuery != 'undefined' and (charge_form instanceof jQuery or 'jquery' of Object(charge_form))
-          charge_form = charge_form.get()[0]
-          #if jquery selector returned nothing
-          if typeof charge_form != 'object'
-            return {}
+      parseForm:(charge_form)->
+        charge = {}
+        if typeof charge_form == 'object'
+          if typeof jQuery != 'undefined' and (charge_form instanceof jQuery or 'jquery' of Object(charge_form))
+            charge_form = charge_form.get()[0]
+            #if jquery selector returned nothing
+            if typeof charge_form != 'object'
+              return {}
 
 
-        if charge_form.nodeType
-          textareas = charge_form.getElementsByTagName('textarea')
-          inputs = charge_form.getElementsByTagName('input')
-          selects = charge_form.getElementsByTagName('select')
-          all_inputs = new Array(textareas.length + inputs.length + selects.length)
+          if charge_form.nodeType
+            textareas = charge_form.getElementsByTagName('textarea')
+            inputs = charge_form.getElementsByTagName('input')
+            selects = charge_form.getElementsByTagName('select')
+            all_inputs = new Array(textareas.length + inputs.length + selects.length)
 
-          for i in [0..textareas.length-1] by 1
-            all_inputs[i] = textareas[i]
+            for i in [0..textareas.length-1] by 1
+              all_inputs[i] = textareas[i]
 
-          for i in [0..inputs.length-1] by 1
-            all_inputs[i+textareas.length] = inputs[i]
+            for i in [0..inputs.length-1] by 1
+              all_inputs[i+textareas.length] = inputs[i]
 
-          for i in [0..selects.length-1] by 1
-            all_inputs[i+textareas.length + inputs.length] = selects[i]
+            for i in [0..selects.length-1] by 1
+              all_inputs[i+textareas.length + inputs.length] = selects[i]
 
-          for input in all_inputs
-            if input
-              attribute_name = input.getAttribute('data-conekta')
-              if attribute_name
-                if input.tagName == 'SELECT'
-                    val = input.value
-                else
-                    val = input.getAttribute('value') || input.innerHTML || input.value
-                attributes = attribute_name.replace(/\]/g, '').replace(/\-/g,'_').split(/\[/)
+            for input in all_inputs
+              if input
+                attribute_name = input.getAttribute('data-conekta')
+                if attribute_name
+                  if input.tagName == 'SELECT'
+                      val = input.value
+                  else
+                      val = input.getAttribute('value') || input.innerHTML || input.value
+                  attributes = attribute_name.replace(/\]/g, '').replace(/\-/g,'_').split(/\[/)
 
-                parent_node = null
-                node = charge
-                last_attribute = null
-                for attribute in attributes
-                  if ! node[attribute]
-                    node[attribute] = {}
+                  parent_node = null
+                  node = charge
+                  last_attribute = null
+                  for attribute in attributes
+                    if ! node[attribute]
+                      node[attribute] = {}
 
-                  parent_node = node
-                  last_attribute = attribute
-                  node = node[attribute]
+                    parent_node = node
+                    last_attribute = attribute
+                    node = node[attribute]
 
-                parent_node[last_attribute] = val
-        else
-          charge = charge_form
+                  parent_node[last_attribute] = val
+          else
+            charge = charge_form
 
-        if charge.details && charge.details.line_items && Object.prototype.toString.call( charge.details.line_items ) != '[object Array]' && typeof charge.details.line_items == 'object'
-          line_items = []
-          for key of charge.details.line_items
-            line_items.push(charge.details.line_items[key])
-          charge.details.line_items = line_items
+          if charge.details && charge.details.line_items && Object.prototype.toString.call( charge.details.line_items ) != '[object Array]' && typeof charge.details.line_items == 'object'
+            line_items = []
+            for key of charge.details.line_items
+              line_items.push(charge.details.line_items[key])
+            charge.details.line_items = line_items
 
-      charge
+        charge
 
-    getSessionId:()->
-      session_id
+      getSessionId:()->
+        session_id
 
-    xDomainPost:(params)->
-      success_callback = (data, textStatus, jqXHR)->
-        if ! data or (data.object == 'error') or ! data.id
-          params.error(data || {
+      xDomainPost:(params)->
+        success_callback = (data, textStatus, jqXHR)->
+          if ! data or (data.object == 'error') or ! data.id
+            params.error(data || {
+              object: 'error',
+              type:'api_error',
+              message:"Something went wrong on Conekta's end"
+            })
+          else
+            params.success(data)
+
+        error_callback = ()->
+          params.error({
             object: 'error',
             type:'api_error',
-            message:"Something went wrong on Conekta's end"
+            message:'Something went wrong, possibly a connectivity issue'
           })
-        else
-          params.success(data)
 
-      error_callback = ()->
-        params.error({
-          object: 'error',
-          type:'api_error',
-          message:'Something went wrong, possibly a connectivity issue'
-        })
+        if document.location.protocol == 'file:'
+          params.url = (params.jsonp_url || params.url) + '/create.js'
+          params.data['_Version'] = "0.3.0"
+          params.data['_RaiseHtmlError'] = false
+          params.data['auth_token'] = Conekta.getPublishableKey()
+          params.data['conekta_client_user_agent'] = '{"agent":"Conekta JavascriptBindings/0.3.0"}'
 
-      if document.location.protocol == 'file:'
-        params.url = (params.jsonp_url || params.url) + '/create.js'
-        params.data['_Version'] = "0.3.0"
-        params.data['_RaiseHtmlError'] = false
-        params.data['auth_token'] = Conekta.getPublishableKey()
-        params.data['conekta_client_user_agent'] = '{"agent":"Conekta JavascriptBindings/0.3.0"}'
-
-        ajax(
-          url: base_url + params.url
-          dataType: 'jsonp'
-          data: params.data
-          success: success_callback
-          error: error_callback
-        )
-      else
-        if typeof (new XMLHttpRequest()).withCredentials != 'undefined'
           ajax(
             url: base_url + params.url
-            type: 'POST'
-            dataType: 'json'
-            data: JSON.stringify(params.data)
-            contentType:'application/json'
-            headers:
-              'RaiseHtmlError': false
-              'Accept': 'application/vnd.conekta-v0.3.0+json'
-              'Accept-Language': Conekta.getLanguage()
-              'Conekta-Client-User-Agent':'{"agent":"Conekta JavascriptBindings/0.3.0"}'
-              'Authorization':'Basic ' + Base64.encode(Conekta.getPublishableKey() + ':')
+            dataType: 'jsonp'
+            data: params.data
             success: success_callback
-            error:error_callback
+            error: error_callback
           )
         else
-          rpc = new easyXDM.Rpc({
-            swf:"https://conektaapi.s3.amazonaws.com/v0.3.2/flash/easyxdm.swf"
-            remote: base_url + "easyxdm_cors_proxy.html"
-          },{
-            remote:{
-              request:{}
-            }
-          })
-          rpc.request({
-            url: base_url + params.url
-            method:'POST'
-            headers:
-              'RaiseHtmlError': false
-              'Accept': 'application/vnd.conekta-v0.3.0+json'
-              'Accept-Language': Conekta.getLanguage()
-              'Conekta-Client-User-Agent':'{"agent":"Conekta JavascriptBindings/0.3.0"}'
-              'Authorization':'Basic ' + Base64.encode(Conekta.getPublishableKey() + ':')
-            data:JSON.stringify(params.data)
-          }, success_callback, error_callback)
+          if typeof (new XMLHttpRequest()).withCredentials != 'undefined'
+            ajax(
+              url: base_url + params.url
+              type: 'POST'
+              dataType: 'json'
+              data: JSON.stringify(params.data)
+              contentType:'application/json'
+              headers:
+                'RaiseHtmlError': false
+                'Accept': 'application/vnd.conekta-v0.3.0+json'
+                'Accept-Language': Conekta.getLanguage()
+                'Conekta-Client-User-Agent':'{"agent":"Conekta JavascriptBindings/0.3.0"}'
+                'Authorization':'Basic ' + Base64.encode(Conekta.getPublishableKey() + ':')
+              success: success_callback
+              error:error_callback
+            )
+          else
+            rpc = new easyXDM.Rpc({
+              swf:"https://conektaapi.s3.amazonaws.com/v0.3.2/flash/easyxdm.swf"
+              remote: base_url + "easyxdm_cors_proxy.html"
+            },{
+              remote:{
+                request:{}
+              }
+            })
+            rpc.request({
+              url: base_url + params.url
+              method:'POST'
+              headers:
+                'RaiseHtmlError': false
+                'Accept': 'application/vnd.conekta-v0.3.0+json'
+                'Accept-Language': Conekta.getLanguage()
+                'Conekta-Client-User-Agent':'{"agent":"Conekta JavascriptBindings/0.3.0"}'
+                'Authorization':'Basic ' + Base64.encode(Conekta.getPublishableKey() + ':')
+              data:JSON.stringify(params.data)
+            }, success_callback, error_callback)
 
-    log: (data)->
-      if typeof console != 'undefined' and console.log
-        console.log(data)
-
+      log: (data)->
+        if typeof console != 'undefined' and console.log
+          console.log(data)
