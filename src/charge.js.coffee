@@ -27,10 +27,12 @@ Conekta.charge.create = (charge_form, success_callback, failure_callback)->
         'object':'error'
         'type':'invalid_request_error'
         'message':"Supplied parameter 'charge' is usable object but has no values (e.g. amount, description) associated with it"
+        'message_to_purchaser':"The card could not be processed, please try again later"
       )
   else
     failure_callback(
       'object':'error'
       'type':'invalid_request_error'
       'message':"Supplied parameter 'charge' is not a javascript object"
+      'message_to_purchaser':"The card could not be processed, please try again later"
     )

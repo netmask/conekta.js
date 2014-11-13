@@ -249,6 +249,7 @@ window.Conekta =
             object: 'error',
             type:'api_error',
             message:"Something went wrong on Conekta's end"
+            message_to_purchaser:"The card could not be processed, please try again later"
           })
         else
           params.success(data)
@@ -258,6 +259,7 @@ window.Conekta =
           object: 'error',
           type:'api_error',
           message:'Something went wrong, possibly a connectivity issue'
+          message_to_purchaser:"The card could not be processed, please try again later"
         })
 
       if document.location.protocol == 'file:'

@@ -18,6 +18,7 @@ Conekta.token.create = (token_form, success_callback, failure_callback)->
           'object':'error'
           'type':'invalid_request_error'
           'message':"The form or hash has no attributes 'card'.  If you are using a form, please ensure that you have have an input or text area with the data-conekta attribute 'card[number]'.  For an example form see: https://github.com/conekta/conekta.js/blob/master/examples/credit_card.html"
+          'message_to_purchaser':"The card could not be processed, please try again later"
         )
 
       if token.card and token.card.address and !(token.card.address.street1 or token.card.address.street2 or token.card.address.street3 or token.card.address.city or token.card.address.state or token.card.address.country or token.card.address.zip)
@@ -35,10 +36,12 @@ Conekta.token.create = (token_form, success_callback, failure_callback)->
         'object':'error'
         'type':'invalid_request_error'
         'message':"supplied parameter 'token' is usable object but has no values (e.g. amount, description) associated with it"
+        'message_to_purchaser':"The card could not be processed, please try again later"
       )
   else
     failure_callback(
       'object':'error'
       'type':'invalid_request_error'
       'message':"Supplied parameter 'token' is not a javascript object or a form"
+      'message_to_purchaser':"The card could not be processed, please try again later"
     )
