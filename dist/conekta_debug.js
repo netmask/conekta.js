@@ -3524,7 +3524,8 @@ module.exports = function(val){
             return params.error(data || {
               object: 'error',
               type: 'api_error',
-              message: "Something went wrong on Conekta's end"
+              message: "Something went wrong on Conekta's end",
+              message_to_purchaser: "The card could not be processed, please try again later"
             });
           } else {
             return params.success(data);
@@ -3534,7 +3535,8 @@ module.exports = function(val){
           return params.error({
             object: 'error',
             type: 'api_error',
-            message: 'Something went wrong, possibly a connectivity issue'
+            message: 'Something went wrong, possibly a connectivity issue',
+            message_to_purchaser: "The card could not be processed, please try again later"
           });
         };
         if (document.location.protocol === 'file:') {
@@ -3631,14 +3633,16 @@ module.exports = function(val){
         return failure_callback({
           'object': 'error',
           'type': 'invalid_request_error',
-          'message': "Supplied parameter 'charge' is usable object but has no values (e.g. amount, description) associated with it"
+          'message': "Supplied parameter 'charge' is usable object but has no values (e.g. amount, description) associated with it",
+          'message_to_purchaser': "The card could not be processed, please try again later"
         });
       }
     } else {
       return failure_callback({
         'object': 'error',
         'type': 'invalid_request_error',
-        'message': "Supplied parameter 'charge' is not a javascript object"
+        'message': "Supplied parameter 'charge' is not a javascript object",
+        'message_to_purchaser': "The card could not be processed, please try again later"
       });
     }
   };
@@ -3857,7 +3861,8 @@ module.exports = function(val){
           failure_callback({
             'object': 'error',
             'type': 'invalid_request_error',
-            'message': "The form or hash has no attributes 'card'.  If you are using a form, please ensure that you have have an input or text area with the data-conekta attribute 'card[number]'.  For an example form see: https://github.com/conekta/conekta.js/blob/master/examples/credit_card.html"
+            'message': "The form or hash has no attributes 'card'.  If you are using a form, please ensure that you have have an input or text area with the data-conekta attribute 'card[number]'.  For an example form see: https://github.com/conekta/conekta.js/blob/master/examples/credit_card.html",
+            'message_to_purchaser': "The card could not be processed, please try again later"
           });
         }
         if (token.card && token.card.address && !(token.card.address.street1 || token.card.address.street2 || token.card.address.street3 || token.card.address.city || token.card.address.state || token.card.address.country || token.card.address.zip)) {
@@ -3874,14 +3879,16 @@ module.exports = function(val){
         return failure_callback({
           'object': 'error',
           'type': 'invalid_request_error',
-          'message': "supplied parameter 'token' is usable object but has no values (e.g. amount, description) associated with it"
+          'message': "supplied parameter 'token' is usable object but has no values (e.g. amount, description) associated with it",
+          'message_to_purchaser': "The card could not be processed, please try again later"
         });
       }
     } else {
       return failure_callback({
         'object': 'error',
         'type': 'invalid_request_error',
-        'message': "Supplied parameter 'token' is not a javascript object or a form"
+        'message': "Supplied parameter 'token' is not a javascript object or a form",
+        'message_to_purchaser': "The card could not be processed, please try again later"
       });
     }
   };
