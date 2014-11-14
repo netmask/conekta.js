@@ -2,7 +2,7 @@ base_url = 'https://api.conekta.io/' #'https://api.conekta.io/'
 publishable_key = null
 session_id = ""
 _language = 'es'
-merchant_id = '205000'
+kount_merchant_id = '205000'
 
 if localStorage and localStorage.getItem and localStorage.getItem('_conekta_session_id')
   session_id = localStorage.getItem('_conekta_session_id')
@@ -33,12 +33,12 @@ fingerprint = ->
       iframe.setAttribute("scrolling", "no")
       iframe.setAttribute("frameborder", "0")
       iframe.setAttribute("width", "1")
-      iframe.setAttribute("src", "#{base_url}fraud_providers/kount/logo.htm?m=#{merchant_id}&s=#{session_id}")
+      iframe.setAttribute("src", "#{base_url}fraud_providers/kount/logo.htm?m=#{kount_merchant_id}&s=#{session_id}")
 
       image = document.createElement('img')
       image.setAttribute("height", "1")
       image.setAttribute("width", "1")
-      image.setAttribute("src", "#{base_url}fraud_providers/kount/logo.gif?m=#{merchant_id}&s=#{session_id}")
+      image.setAttribute("src", "#{base_url}fraud_providers/kount/logo.gif?m=#{kount_merchant_id}&s=#{session_id}")
 
       try
         iframe.appendChild(image)

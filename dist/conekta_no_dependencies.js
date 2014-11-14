@@ -2,7 +2,7 @@
 */
 
 (function() {
-  var Base64, base_url, fingerprint, i, merchant_id, publishable_key, random_index, random_value_array, session_id, useable_characters, _i, _j, _language, _ref;
+  var Base64, base_url, fingerprint, i, kount_merchant_id, publishable_key, random_index, random_value_array, session_id, useable_characters, _i, _j, _language, _ref;
 
   base_url = 'https://api.conekta.io/';
 
@@ -12,7 +12,7 @@
 
   _language = 'es';
 
-  merchant_id = '205000';
+  kount_merchant_id = '205000';
 
   if (localStorage && localStorage.getItem && localStorage.getItem('_conekta_session_id')) {
     session_id = localStorage.getItem('_conekta_session_id');
@@ -46,11 +46,11 @@
         iframe.setAttribute("scrolling", "no");
         iframe.setAttribute("frameborder", "0");
         iframe.setAttribute("width", "1");
-        iframe.setAttribute("src", "" + base_url + "fraud_providers/kount/logo.htm?m=" + merchant_id + "&s=" + session_id);
+        iframe.setAttribute("src", "" + base_url + "fraud_providers/kount/logo.htm?m=" + kount_merchant_id + "&s=" + session_id);
         image = document.createElement('img');
         image.setAttribute("height", "1");
         image.setAttribute("width", "1");
-        image.setAttribute("src", "" + base_url + "fraud_providers/kount/logo.gif?m=" + merchant_id + "&s=" + session_id);
+        image.setAttribute("src", "" + base_url + "fraud_providers/kount/logo.gif?m=" + kount_merchant_id + "&s=" + session_id);
         try {
           iframe.appendChild(image);
         } catch (_error) {
