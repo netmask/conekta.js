@@ -8,7 +8,7 @@ if localStorage and localStorage.getItem and localStorage.getItem('_conekta_sess
   session_id = localStorage.getItem('_conekta_session_id')
 else
   useable_characters = "abcdefghijklmnopqrstuvwxyz0123456789"
-  if crypto and crypto.getRandomValues
+  if typeof crypto != 'undefined' and crypto.getRandomValues
     random_value_array = new Uint32Array(32)
     crypto.getRandomValues(random_value_array)
     for i in [0..random_value_array.length-1]
