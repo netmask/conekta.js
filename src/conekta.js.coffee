@@ -27,6 +27,7 @@ fingerprint = ->
 
       body = document.getElementsByTagName('body')[0]
 
+      #if ! (location.protocol == 'https:' and (navigator.userAgent.match(/MSIE/) or navigator.userAgent.match(/Trident\/7\./)))
       #fingerprinting png
       iframe = document.createElement('iframe')
       iframe.setAttribute("height", "1")
