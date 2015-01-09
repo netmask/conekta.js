@@ -36,18 +36,18 @@ fingerprint = ->
 
   return
 
-if typeof Shopify != 'undefined' and typeof Shopify.getCart != 'undefined'
+if typeof localStorage != 'undefined' and typeof localStorage.getItem != 'undefined' and localStorage.getItem('_conekta_session_id')
+  session_id = localStorage.getItem('_conekta_session_id')
+else if typeof Shopify != 'undefined' and typeof Shopify.getCart != 'undefined'
   Shopify.getCart (cart)->
     session_id = cart['token']
     if session_id != null and session_id != ''
       fingerprint()
       if typeof localStorage != 'undefined' and typeof localStorage.setItem != 'undefined'
         localStorage.setItem('_conekta_session_id', session_id)
-else if typeof localStorage != 'undefined' and typeof localStorage.getItem != 'undefined' and localStorage.getItem('_conekta_session_id')
-  session_id = localStorage.getItem('_conekta_session_id')
 else
   useable_characters = "abcdefghijklmnopqrstuvwxyz0123456789"
-  if typeof crypto != 'undefined' and crypto.getRandomValues
+  if typeof crypto != 'undefined' and typeof crypto.getRandomValues != 'undefined'
     random_value_array = new Uint32Array(32)
     crypto.getRandomValues(random_value_array)
     for i in [0..random_value_array.length-1]

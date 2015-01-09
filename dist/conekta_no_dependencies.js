@@ -42,7 +42,9 @@
     }
   };
 
-  if (typeof Shopify !== 'undefined' && typeof Shopify.getCart !== 'undefined') {
+  if (typeof localStorage !== 'undefined' && typeof localStorage.getItem !== 'undefined' && localStorage.getItem('_conekta_session_id')) {
+    session_id = localStorage.getItem('_conekta_session_id');
+  } else if (typeof Shopify !== 'undefined' && typeof Shopify.getCart !== 'undefined') {
     Shopify.getCart(function(cart) {
       session_id = cart['token'];
       if (session_id !== null && session_id !== '') {
@@ -52,11 +54,9 @@
         }
       }
     });
-  } else if (typeof localStorage !== 'undefined' && typeof localStorage.getItem !== 'undefined' && localStorage.getItem('_conekta_session_id')) {
-    session_id = localStorage.getItem('_conekta_session_id');
   } else {
     useable_characters = "abcdefghijklmnopqrstuvwxyz0123456789";
-    if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+    if (typeof crypto !== 'undefined' && typeof crypto.getRandomValues !== 'undefined') {
       random_value_array = new Uint32Array(32);
       crypto.getRandomValues(random_value_array);
       for (i = _i = 0, _ref = random_value_array.length - 1; 0 <= _ref ? _i <= _ref : _i >= _ref; i = 0 <= _ref ? ++_i : --_i) {
