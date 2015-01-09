@@ -3264,27 +3264,6 @@ module.exports = function(val){
 
   kount_merchant_id = '205000';
 
-  if (localStorage && localStorage.getItem && localStorage.getItem('_conekta_session_id')) {
-    session_id = localStorage.getItem('_conekta_session_id');
-  } else {
-    useable_characters = "abcdefghijklmnopqrstuvwxyz0123456789";
-    if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
-      random_value_array = new Uint32Array(32);
-      crypto.getRandomValues(random_value_array);
-      for (i = _i = 0, _ref = random_value_array.length - 1; 0 <= _ref ? _i <= _ref : _i >= _ref; i = 0 <= _ref ? ++_i : --_i) {
-        session_id += useable_characters.charAt(random_value_array[i] % 36);
-      }
-    } else {
-      for (i = _j = 0; _j <= 30; i = ++_j) {
-        random_index = Math.floor(Math.random() * 36);
-        session_id += useable_characters.charAt(random_index);
-      }
-    }
-    if (localStorage && localStorage.setItem) {
-      localStorage.setItem('_conekta_session_id', session_id);
-    }
-  }
-
   fingerprint = function() {
     var body, e, iframe, image;
     if (typeof document !== 'undefined' && typeof document.body !== 'undefined' && document.body && (document.readyState === 'interactive' || document.readyState === 'complete') && Conekta) {
@@ -3313,7 +3292,37 @@ module.exports = function(val){
     }
   };
 
-  fingerprint();
+  if (typeof Shopify !== 'undefined' && typeof Shopify.getCart !== 'undefined') {
+    Shopify.getCart(function(cart) {
+      session_id = cart['token'];
+      if (session_id !== null && session_id !== '') {
+        fingerprint();
+        if (typeof localStorage !== 'undefined' && typeof localStorage.setItem !== 'undefined') {
+          return localStorage.setItem('_conekta_session_id', session_id);
+        }
+      }
+    });
+  } else if (typeof localStorage !== 'undefined' && typeof localStorage.getItem !== 'undefined' && localStorage.getItem('_conekta_session_id')) {
+    session_id = localStorage.getItem('_conekta_session_id');
+  } else {
+    useable_characters = "abcdefghijklmnopqrstuvwxyz0123456789";
+    if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+      random_value_array = new Uint32Array(32);
+      crypto.getRandomValues(random_value_array);
+      for (i = _i = 0, _ref = random_value_array.length - 1; 0 <= _ref ? _i <= _ref : _i >= _ref; i = 0 <= _ref ? ++_i : --_i) {
+        session_id += useable_characters.charAt(random_value_array[i] % 36);
+      }
+    } else {
+      for (i = _j = 0; _j <= 30; i = ++_j) {
+        random_index = Math.floor(Math.random() * 36);
+        session_id += useable_characters.charAt(random_index);
+      }
+    }
+    if (typeof localStorage !== 'undefined' && typeof localStorage.setItem !== 'undefined') {
+      localStorage.setItem('_conekta_session_id', session_id);
+    }
+    fingerprint();
+  }
 
   Base64 = {
     _keyStr: "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=",

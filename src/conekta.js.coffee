@@ -4,22 +4,6 @@ session_id = ""
 _language = 'es'
 kount_merchant_id = '205000'
 
-if localStorage and localStorage.getItem and localStorage.getItem('_conekta_session_id')
-  session_id = localStorage.getItem('_conekta_session_id')
-else
-  useable_characters = "abcdefghijklmnopqrstuvwxyz0123456789"
-  if typeof crypto != 'undefined' and crypto.getRandomValues
-    random_value_array = new Uint32Array(32)
-    crypto.getRandomValues(random_value_array)
-    for i in [0..random_value_array.length-1]
-      session_id += useable_characters.charAt(random_value_array[i] % 36)
-  else
-    for i in [0..30]
-      random_index = Math.floor(Math.random() * 36)
-      session_id += useable_characters.charAt(random_index)
-  if localStorage and localStorage.setItem
-    localStorage.setItem('_conekta_session_id', session_id)
-
 fingerprint = ->
   if typeof document != 'undefined' and typeof document.body != 'undefined' and document.body and (document.readyState == 'interactive' or document.readyState == 'complete') and Conekta
     if ! Conekta._helpers.finger_printed
@@ -52,7 +36,30 @@ fingerprint = ->
 
   return
 
-fingerprint()
+if typeof Shopify != 'undefined' and typeof Shopify.getCart != 'undefined'
+  Shopify.getCart (cart)->
+    session_id = cart['token']
+    if session_id != null and session_id != ''
+      fingerprint()
+      if typeof localStorage != 'undefined' and typeof localStorage.setItem != 'undefined'
+        localStorage.setItem('_conekta_session_id', session_id)
+else if typeof localStorage != 'undefined' and typeof localStorage.getItem != 'undefined' and localStorage.getItem('_conekta_session_id')
+  session_id = localStorage.getItem('_conekta_session_id')
+else
+  useable_characters = "abcdefghijklmnopqrstuvwxyz0123456789"
+  if typeof crypto != 'undefined' and crypto.getRandomValues
+    random_value_array = new Uint32Array(32)
+    crypto.getRandomValues(random_value_array)
+    for i in [0..random_value_array.length-1]
+      session_id += useable_characters.charAt(random_value_array[i] % 36)
+  else
+    for i in [0..30]
+      random_index = Math.floor(Math.random() * 36)
+      session_id += useable_characters.charAt(random_index)
+  if typeof localStorage != 'undefined' and typeof localStorage.setItem != 'undefined'
+    localStorage.setItem('_conekta_session_id', session_id)
+
+  fingerprint()
 
 Base64 =
   # private property
