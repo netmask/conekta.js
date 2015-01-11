@@ -1,14 +1,26 @@
 base_url = 'https://api.conekta.io/' #'https://api.conekta.io/'
-publishable_key = null
 session_id = ""
 _language = 'es'
 kount_merchant_id = '205000'
+
+localstorageGet = (key)->
+  if typeof localStorage != 'undefined' and typeof localStorage.getItem != 'undefined' 
+    return localStorage.getItem(key)
+  else
+    null
+
+localstorageSet = (key, value)->
+  if typeof localStorage != 'undefined' and typeof localStorage.setItem != 'undefined' 
+    return localStorage.setItem(key, value)
+
+publishable_key = localstorageGet('_conekta_publishable_key')
 
 fingerprint = ->
   if typeof document != 'undefined' and typeof document.body != 'undefined' and document.body and (document.readyState == 'interactive' or document.readyState == 'complete') and Conekta
     if ! Conekta._helpers.finger_printed
       Conekta._helpers.finger_printed = true
 
+      #kount
       body = document.getElementsByTagName('body')[0]
 
       #if ! (location.protocol == 'https:' and (navigator.userAgent.match(/MSIE/) or navigator.userAgent.match(/Trident\/7\./)))
@@ -31,20 +43,54 @@ fingerprint = ->
         #do nothing
 
       body.appendChild(iframe)
+
+      #siftscience
+      _user_id = ''
+
+      _sift = _sift or []
+
+      _sift.push [
+        "_setAccount"
+        "INSERT_JS_SNIPPET_KEY_HERE"
+      ]
+      _sift.push [
+        "_setUserId"
+        _user_id
+      ]
+      _sift.push [
+        "_setSessionId"
+        session_id
+      ]
+      _sift.push ["_trackPageview"]
+      (->
+        ls = ->
+          e = document.createElement("script")
+          e.type = "text/javascript"
+          e.async = true
+          e.src = "https://cdn.siftscience.com/s.js"
+          s = document.getElementsByTagName("script")[0]
+          s.parentNode.insertBefore e, s
+          return
+        if window.attachEvent
+          window.attachEvent "onload", ls
+        else
+          window.addEventListener "load", ls, false
+        return
+      )()
   else
     setTimeout(fingerprint, 150)
 
   return
 
-if typeof localStorage != 'undefined' and typeof localStorage.getItem != 'undefined' and localStorage.getItem('_conekta_session_id')
+
+if localstorageGet('_conekta_session_id')
   session_id = localStorage.getItem('_conekta_session_id')
 else if typeof Shopify != 'undefined' and typeof Shopify.getCart != 'undefined'
   Shopify.getCart (cart)->
     session_id = cart['token']
     if session_id != null and session_id != ''
       fingerprint()
-      if typeof localStorage != 'undefined' and typeof localStorage.setItem != 'undefined'
-        localStorage.setItem('_conekta_session_id', session_id)
+      localstorageSet('_conekta_session_id', session_id)
 else
   useable_characters = "abcdefghijklmnopqrstuvwxyz0123456789"
   if typeof crypto != 'undefined' and typeof crypto.getRandomValues != 'undefined'
@@ -56,8 +102,7 @@ else
     for i in [0..30]
       random_index = Math.floor(Math.random() * 36)
       session_id += useable_characters.charAt(random_index)
-  if typeof localStorage != 'undefined' and typeof localStorage.setItem != 'undefined'
-    localStorage.setItem('_conekta_session_id', session_id)
+  localstorageSet('_conekta_session_id', session_id)
 
   fingerprint()
 
@@ -172,6 +217,7 @@ if ! window.Conekta
     setPublishableKey: (key)->
       if typeof key == 'string' and key.match(/^[a-zA-Z0-9_]*$/) and key.length >= 20 and key.length < 30
         publishable_key = key
+        localstorageSet('_conekta_publishable_key', publishable_key)
       else
         Conekta._helpers.log('Unusable public key: ' + key)
       return

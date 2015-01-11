@@ -15,7 +15,7 @@
   kount_merchant_id = '205000';
 
   fingerprint = function() {
-    var body, e, iframe, image;
+    var body, e, iframe, image, _sift, _user_id;
     if (typeof document !== 'undefined' && typeof document.body !== 'undefined' && document.body && (document.readyState === 'interactive' || document.readyState === 'complete') && Conekta) {
       if (!Conekta._helpers.finger_printed) {
         Conekta._helpers.finger_printed = true;
@@ -36,6 +36,29 @@
           e = _error;
         }
         body.appendChild(iframe);
+        _user_id = '';
+        _sift = _sift || [];
+        _sift.push(["_setAccount", "INSERT_JS_SNIPPET_KEY_HERE"]);
+        _sift.push(["_setUserId", _user_id]);
+        _sift.push(["_setSessionId", session_id]);
+        _sift.push(["_trackPageview"]);
+        (function() {
+          var ls;
+          ls = function() {
+            var s;
+            e = document.createElement("script");
+            e.type = "text/javascript";
+            e.async = true;
+            e.src = "https://cdn.siftscience.com/s.js";
+            s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(e, s);
+          };
+          if (window.attachEvent) {
+            window.attachEvent("onload", ls);
+          } else {
+            window.addEventListener("load", ls, false);
+          }
+        })();
       }
     } else {
       setTimeout(fingerprint, 150);
