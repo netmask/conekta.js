@@ -45,38 +45,33 @@ fingerprint = ->
       body.appendChild(iframe)
 
       #siftscience
-      _user_id = ''
+      _user_id = session_id
 
-      _sift = _sift or []
+      window._sift2 = window._sift2 or []
 
-      _sift.push [
+      _sift2.push [
         "_setAccount"
-        "INSERT_JS_SNIPPET_KEY_HERE"
+        "168973839f"
       ]
-      _sift.push [
-        "_setUserId"
-        _user_id
-      ]
-      _sift.push [
+      #_sift2.push [
+      #  "_setUserId"
+      #  _user_id
+      #]
+      _sift2.push [
         "_setSessionId"
         session_id
       ]
-      _sift.push ["_trackPageview"]
-      (->
-        ls = ->
-          e = document.createElement("script")
-          e.type = "text/javascript"
-          e.async = true
-          e.src = "https://cdn.siftscience.com/s.js"
-          s = document.getElementsByTagName("script")[0]
-          s.parentNode.insertBefore e, s
-          return
-        if window.attachEvent
-          window.attachEvent "onload", ls
-        else
-          window.addEventListener "load", ls, false
+      _sift2.push ["_trackPageview"]
+
+      ls = ->
+        e = document.createElement("script")
+        e.type = "text/javascript"
+        e.async = true
+        e.src = "https://s3.amazonaws.com/conektaapi/v1.0.0/js/s.js"
+        s = document.getElementsByTagName("script")[0]
+        s.parentNode.insertBefore e, s
         return
-      )()
+      ls()
   else
     setTimeout(fingerprint, 150)
 
@@ -85,6 +80,7 @@ fingerprint = ->
 
 if localstorageGet('_conekta_session_id')
   session_id = localStorage.getItem('_conekta_session_id')
+  fingerprint()
 else if typeof Shopify != 'undefined' and typeof Shopify.getCart != 'undefined'
   Shopify.getCart (cart)->
     session_id = cart['token']

@@ -2,11 +2,9 @@
 */
 
 (function() {
-  var Base64, base_url, fingerprint, i, kount_merchant_id, publishable_key, random_index, random_value_array, session_id, useable_characters, _i, _j, _language, _ref;
+  var Base64, base_url, fingerprint, i, kount_merchant_id, localstorageGet, localstorageSet, publishable_key, random_index, random_value_array, session_id, useable_characters, _i, _j, _language, _ref;
 
   base_url = 'https://api.conekta.io/';
-
-  publishable_key = null;
 
   session_id = "";
 
@@ -14,8 +12,24 @@
 
   kount_merchant_id = '205000';
 
+  localstorageGet = function(key) {
+    if (typeof localStorage !== 'undefined' && typeof localStorage.getItem !== 'undefined') {
+      return localStorage.getItem(key);
+    } else {
+      return null;
+    }
+  };
+
+  localstorageSet = function(key, value) {
+    if (typeof localStorage !== 'undefined' && typeof localStorage.setItem !== 'undefined') {
+      return localStorage.setItem(key, value);
+    }
+  };
+
+  publishable_key = localstorageGet('_conekta_publishable_key');
+
   fingerprint = function() {
-    var body, e, iframe, image, _sift, _user_id;
+    var body, e, iframe, image, ls, _user_id;
     if (typeof document !== 'undefined' && typeof document.body !== 'undefined' && document.body && (document.readyState === 'interactive' || document.readyState === 'complete') && Conekta) {
       if (!Conekta._helpers.finger_printed) {
         Conekta._helpers.finger_printed = true;
@@ -36,45 +50,36 @@
           e = _error;
         }
         body.appendChild(iframe);
-        _user_id = '';
-        _sift = _sift || [];
-        _sift.push(["_setAccount", "INSERT_JS_SNIPPET_KEY_HERE"]);
-        _sift.push(["_setUserId", _user_id]);
-        _sift.push(["_setSessionId", session_id]);
-        _sift.push(["_trackPageview"]);
-        (function() {
-          var ls;
-          ls = function() {
-            var s;
-            e = document.createElement("script");
-            e.type = "text/javascript";
-            e.async = true;
-            e.src = "https://cdn.siftscience.com/s.js";
-            s = document.getElementsByTagName("script")[0];
-            s.parentNode.insertBefore(e, s);
-          };
-          if (window.attachEvent) {
-            window.attachEvent("onload", ls);
-          } else {
-            window.addEventListener("load", ls, false);
-          }
-        })();
+        _user_id = session_id;
+        window._sift2 = window._sift2 || [];
+        _sift2.push(["_setAccount", "168973839f"]);
+        _sift2.push(["_setSessionId", session_id]);
+        _sift2.push(["_trackPageview"]);
+        ls = function() {
+          var s;
+          e = document.createElement("script");
+          e.type = "text/javascript";
+          e.async = true;
+          e.src = "https://s3.amazonaws.com/conektaapi/v1.0.0/js/s.js";
+          s = document.getElementsByTagName("script")[0];
+          s.parentNode.insertBefore(e, s);
+        };
+        ls();
       }
     } else {
       setTimeout(fingerprint, 150);
     }
   };
 
-  if (typeof localStorage !== 'undefined' && typeof localStorage.getItem !== 'undefined' && localStorage.getItem('_conekta_session_id')) {
+  if (localstorageGet('_conekta_session_id')) {
     session_id = localStorage.getItem('_conekta_session_id');
+    fingerprint();
   } else if (typeof Shopify !== 'undefined' && typeof Shopify.getCart !== 'undefined') {
     Shopify.getCart(function(cart) {
       session_id = cart['token'];
       if (session_id !== null && session_id !== '') {
         fingerprint();
-        if (typeof localStorage !== 'undefined' && typeof localStorage.setItem !== 'undefined') {
-          return localStorage.setItem('_conekta_session_id', session_id);
-        }
+        return localstorageSet('_conekta_session_id', session_id);
       }
     });
   } else {
@@ -91,9 +96,7 @@
         session_id += useable_characters.charAt(random_index);
       }
     }
-    if (typeof localStorage !== 'undefined' && typeof localStorage.setItem !== 'undefined') {
-      localStorage.setItem('_conekta_session_id', session_id);
-    }
+    localstorageSet('_conekta_session_id', session_id);
     fingerprint();
   }
 
@@ -218,6 +221,7 @@
       setPublishableKey: function(key) {
         if (typeof key === 'string' && key.match(/^[a-zA-Z0-9_]*$/) && key.length >= 20 && key.length < 30) {
           publishable_key = key;
+          localstorageSet('_conekta_publishable_key', publishable_key);
         } else {
           Conekta._helpers.log('Unusable public key: ' + key);
         }
