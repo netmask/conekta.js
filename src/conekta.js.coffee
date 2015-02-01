@@ -16,7 +16,7 @@ localstorageSet = (key, value)->
 publishable_key = localstorageGet('_conekta_publishable_key')
 
 fingerprint = ->
-  if typeof document != 'undefined' and typeof document.body != 'undefined' and document.body and (document.readyState == 'interactive' or document.readyState == 'complete') and Conekta
+  if typeof document != 'undefined' and typeof document.body != 'undefined' and document.body and (document.readyState == 'interactive' or document.readyState == 'complete') and 'undefined' != typeof Conekta
     if ! Conekta._helpers.finger_printed
       Conekta._helpers.finger_printed = true
 
@@ -51,7 +51,7 @@ fingerprint = ->
 
       _sift2.push [
         "_setAccount"
-        "168973839f"
+        "6b875c6cd0"
       ]
       #_sift2.push [
       #  "_setUserId"

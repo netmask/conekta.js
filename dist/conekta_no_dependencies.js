@@ -30,7 +30,7 @@
 
   fingerprint = function() {
     var body, e, iframe, image, ls, _user_id;
-    if (typeof document !== 'undefined' && typeof document.body !== 'undefined' && document.body && (document.readyState === 'interactive' || document.readyState === 'complete') && Conekta) {
+    if (typeof document !== 'undefined' && typeof document.body !== 'undefined' && document.body && (document.readyState === 'interactive' || document.readyState === 'complete') && 'undefined' !== typeof Conekta) {
       if (!Conekta._helpers.finger_printed) {
         Conekta._helpers.finger_printed = true;
         body = document.getElementsByTagName('body')[0];
@@ -52,7 +52,7 @@
         body.appendChild(iframe);
         _user_id = session_id;
         window._sift2 = window._sift2 || [];
-        _sift2.push(["_setAccount", "168973839f"]);
+        _sift2.push(["_setAccount", "6b875c6cd0"]);
         _sift2.push(["_setSessionId", session_id]);
         _sift2.push(["_trackPageview"]);
         ls = function() {
