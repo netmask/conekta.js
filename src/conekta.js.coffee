@@ -51,7 +51,7 @@ fingerprint = ->
 
       _sift2.push [
         "_setAccount"
-        "6b875c6cd0"
+        "dc8a93690e"
       ]
       #_sift2.push [
       #  "_setUserId"
