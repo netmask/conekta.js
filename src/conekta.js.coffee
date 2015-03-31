@@ -2,6 +2,7 @@ base_url = 'https://api.conekta.io/' #'https://api.conekta.io/'
 session_id = ""
 _language = 'es'
 kount_merchant_id = '205000'
+antifraud_config = {}
 
 localstorageGet = (key)->
   if typeof localStorage != 'undefined' and typeof localStorage.getItem != 'undefined' 
@@ -43,37 +44,44 @@ fingerprint = ->
         #do nothing
 
       body.appendChild(iframe)
-
-      #siftscience
-      _user_id = session_id
-
-      window._sift2 = window._sift2 or []
-
-      _sift2.push [
-        "_setAccount"
-        "dc8a93690e"
-      ]
-      #_sift2.push [
-      #  "_setUserId"
-      #  _user_id
-      #]
-      _sift2.push [
-        "_setSessionId"
-        session_id
-      ]
-      _sift2.push ["_trackPageview"]
-
-      ls = ->
-        e = document.createElement("script")
-        e.type = "text/javascript"
-        e.async = true
-        e.src = "https://s3.amazonaws.com/conektaapi/v1.0.0/js/s.js"
-        s = document.getElementsByTagName("script")[0]
-        s.parentNode.insertBefore e, s
-        return
-      ls()
   else
     setTimeout(fingerprint, 150)
+
+  return
+
+send_beacon = ->
+  if typeof document != 'undefined' and typeof document.body != 'undefined' and document.body and (document.readyState == 'interactive' or document.readyState == 'complete') and 'undefined' != typeof Conekta
+    if ! Conekta._helpers.beacon_sent
+      Conekta._helpers.beacon_sent = true
+
+      if antifraud_config['siftscience']
+        #siftscience
+        _user_id = session_id
+
+        window._sift2 = window._sift2 or []
+
+        _sift2.push [
+          "_setAccount"
+          antifraud_config['siftscience']['beacon_key']
+        ]
+
+        _sift2.push [
+          "_setSessionId"
+          session_id
+        ]
+        _sift2.push ["_trackPageview"]
+
+        ls = ->
+          e = document.createElement("script")
+          e.type = "text/javascript"
+          e.async = true
+          e.src = "https://s3.amazonaws.com/conektaapi/v1.0.0/js/s.js"
+          s = document.getElementsByTagName("script")[0]
+          s.parentNode.insertBefore e, s
+          return
+        ls()
+  else
+    setTimeout(send_beacon, 150)
 
   return
 
@@ -101,6 +109,32 @@ else
   localstorageSet('_conekta_session_id', session_id)
 
   fingerprint()
+
+getAntifraudConfig = ()->
+  unparsed_antifraud_config = localstorageGet('conekta_antifraud_config')
+
+  if unparsed_antifraud_config and unparsed_antifraud_config.match(/^\{/)
+    antifraud_config = JSON.parse(unparsed_antifraud_config)
+  else
+    success_callback = (config)->
+      antifraud_config = JSON.parse(config)
+      localstorageSet('conekta_antifraud_config', antifraud_config)
+      send_beacon()
+
+    error_callback = ()->
+      #no config, fallback
+
+    url = "https://conektaapi_includes.s3.amazonaws.com/antifraud/#{document.domain}.js"
+
+    ajax(
+      url: url
+      dataType: 'jsonp'
+      jsonpCallback: 'conekta_antifraud_config_jsonp'
+      success: success_callback
+      error: error_callback
+    )
+
+getAntifraudConfig()
 
 Base64 =
   # private property
@@ -223,6 +257,7 @@ if ! window.Conekta
 
     _helpers:
       finger_printed: false
+      beacon_sent: false
       objectKeys:(obj)->
         keys = []
         for p of obj

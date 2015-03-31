@@ -36,7 +36,7 @@
 */
 
 (function() {
-  var Base64, base_url, fingerprint, i, kount_merchant_id, localstorageGet, localstorageSet, publishable_key, random_index, random_value_array, session_id, useable_characters, _i, _j, _language, _ref;
+  var Base64, antifraud_config, base_url, fingerprint, getAntifraudConfig, i, kount_merchant_id, localstorageGet, localstorageSet, publishable_key, random_index, random_value_array, send_beacon, session_id, useable_characters, _i, _j, _language, _ref;
 
   base_url = 'https://api.conekta.io/';
 
@@ -45,6 +45,8 @@
   _language = 'es';
 
   kount_merchant_id = '205000';
+
+  antifraud_config = {};
 
   localstorageGet = function(key) {
     if (typeof localStorage !== 'undefined' && typeof localStorage.getItem !== 'undefined') {
@@ -63,7 +65,7 @@
   publishable_key = localstorageGet('_conekta_publishable_key');
 
   fingerprint = function() {
-    var body, e, iframe, image, ls, _user_id;
+    var body, e, iframe, image;
     if (typeof document !== 'undefined' && typeof document.body !== 'undefined' && document.body && (document.readyState === 'interactive' || document.readyState === 'complete') && 'undefined' !== typeof Conekta) {
       if (!Conekta._helpers.finger_printed) {
         Conekta._helpers.finger_printed = true;
@@ -84,24 +86,37 @@
           e = _error;
         }
         body.appendChild(iframe);
-        _user_id = session_id;
-        window._sift2 = window._sift2 || [];
-        _sift2.push(["_setAccount", "dc8a93690e"]);
-        _sift2.push(["_setSessionId", session_id]);
-        _sift2.push(["_trackPageview"]);
-        ls = function() {
-          var s;
-          e = document.createElement("script");
-          e.type = "text/javascript";
-          e.async = true;
-          e.src = "https://s3.amazonaws.com/conektaapi/v1.0.0/js/s.js";
-          s = document.getElementsByTagName("script")[0];
-          s.parentNode.insertBefore(e, s);
-        };
-        ls();
       }
     } else {
       setTimeout(fingerprint, 150);
+    }
+  };
+
+  send_beacon = function() {
+    var ls, _user_id;
+    if (typeof document !== 'undefined' && typeof document.body !== 'undefined' && document.body && (document.readyState === 'interactive' || document.readyState === 'complete') && 'undefined' !== typeof Conekta) {
+      if (!Conekta._helpers.beacon_sent) {
+        Conekta._helpers.beacon_sent = true;
+        if (antifraud_config['siftscience']) {
+          _user_id = session_id;
+          window._sift2 = window._sift2 || [];
+          _sift2.push(["_setAccount", antifraud_config['siftscience']['beacon_key']]);
+          _sift2.push(["_setSessionId", session_id]);
+          _sift2.push(["_trackPageview"]);
+          ls = function() {
+            var e, s;
+            e = document.createElement("script");
+            e.type = "text/javascript";
+            e.async = true;
+            e.src = "https://s3.amazonaws.com/conektaapi/v1.0.0/js/s.js";
+            s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(e, s);
+          };
+          ls();
+        }
+      }
+    } else {
+      setTimeout(send_beacon, 150);
     }
   };
 
@@ -133,6 +148,31 @@
     localstorageSet('_conekta_session_id', session_id);
     fingerprint();
   }
+
+  getAntifraudConfig = function() {
+    var error_callback, success_callback, unparsed_antifraud_config, url;
+    unparsed_antifraud_config = localstorageGet('conekta_antifraud_config');
+    if (unparsed_antifraud_config && unparsed_antifraud_config.match(/^\{/)) {
+      return antifraud_config = JSON.parse(unparsed_antifraud_config);
+    } else {
+      success_callback = function(config) {
+        antifraud_config = JSON.parse(config);
+        localstorageSet('conekta_antifraud_config', antifraud_config);
+        return send_beacon();
+      };
+      error_callback = function() {};
+      url = "https://conektaapi_includes.s3.amazonaws.com/antifraud/" + document.domain + ".js";
+      return ajax({
+        url: url,
+        dataType: 'jsonp',
+        jsonpCallback: 'conekta_antifraud_config_jsonp',
+        success: success_callback,
+        error: error_callback
+      });
+    }
+  };
+
+  getAntifraudConfig();
 
   Base64 = {
     _keyStr: "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=",
@@ -265,6 +305,7 @@
       },
       _helpers: {
         finger_printed: false,
+        beacon_sent: false,
         objectKeys: function(obj) {
           var keys, p;
           keys = [];
