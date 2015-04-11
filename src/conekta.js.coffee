@@ -90,11 +90,29 @@ if localstorageGet('_conekta_session_id')
   session_id = localStorage.getItem('_conekta_session_id')
   fingerprint()
 else if typeof Shopify != 'undefined' and typeof Shopify.getCart != 'undefined'
-  Shopify.getCart (cart)->
+  getCartCallback = (cart)->
     session_id = cart['token']
     if session_id != null and session_id != ''
       fingerprint()
+      send_beacon()
       localstorageSet('_conekta_session_id', session_id)
+      localstorageSet('_conekta_session_id_timestamp', (new Date).getTime().toString())
+    return
+
+  Shopify.getCart (cart)->
+    getCartCallback(cart)
+    return
+
+  originalGetCart = Shopify.getCart
+  Shopify.getCart = (callback)->
+    tapped_callback = (cart)->
+      callback(cart)
+
+      getCartCallback(cart)
+      return
+
+    originalGetCart(tapped_callback)
+    return
 else
   useable_characters = "abcdefghijklmnopqrstuvwxyz0123456789"
   if typeof crypto != 'undefined' and typeof crypto.getRandomValues != 'undefined'
