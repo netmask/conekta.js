@@ -65,16 +65,16 @@
         Conekta._helpers.beacon_sent = true;
         if (antifraud_config['siftscience']) {
           _user_id = session_id;
-          window._sift2 = window._sift2 || [];
-          _sift2.push(["_setAccount", antifraud_config['siftscience']['beacon_key']]);
-          _sift2.push(["_setSessionId", session_id]);
-          _sift2.push(["_trackPageview"]);
+          window._sift = window._sift || [];
+          _sift.push(["_setAccount", antifraud_config['siftscience']['beacon_key']]);
+          _sift.push(["_setSessionId", session_id]);
+          _sift.push(["_trackPageview"]);
           ls = function() {
             var e, s;
             e = document.createElement("script");
             e.type = "text/javascript";
             e.async = true;
-            e.src = "https://s3.amazonaws.com/conektaapi/v1.0.0/js/s.js";
+            e.src = ('https:' === document.location.protocol ? 'https://' : 'http://') + 'cdn.siftscience.com/s.js';
             s = document.getElementsByTagName("script")[0];
             s.parentNode.insertBefore(e, s);
           };
@@ -122,7 +122,7 @@
       return antifraud_config = JSON.parse(unparsed_antifraud_config);
     } else {
       success_callback = function(config) {
-        antifraud_config = JSON.parse(config);
+        antifraud_config = config;
         localstorageSet('conekta_antifraud_config', antifraud_config);
         return send_beacon();
       };

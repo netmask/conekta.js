@@ -3083,46 +3083,54 @@ function ajaxComplete(status, xhr, settings) {
 function empty() {}
 
 ajax.JSONP = function(options){
-  if (!('type' in options)) return ajax(options)
+  if (!('type' in options)) return ajax(options);
 
-  var callbackName = 'jsonp' + (++jsonpID),
-    script = document.createElement('script'),
+  var callbackName = 'jsonp' + (++jsonpID);
+  if (options['jsonpCallback']){
+    callbackName = options['jsonpCallback'];
+  }
+
+  var script = document.createElement('script'),
     abort = function(){
       //todo: remove script
       //$(script).remove()
-      if (callbackName in window) window[callbackName] = empty
-      ajaxComplete('abort', xhr, options)
+      if (callbackName in window) window[callbackName] = empty;
+      ajaxComplete('abort', xhr, options);
     },
     xhr = { abort: abort }, abortTimeout,
     head = document.getElementsByTagName("head")[0]
-      || document.documentElement
+      || document.documentElement;
 
   if (options.error) script.onerror = function() {
-    xhr.abort()
-    options.error()
+    xhr.abort();
+    options.error();
   }
 
   window[callbackName] = function(data){
-    clearTimeout(abortTimeout)
+    clearTimeout(abortTimeout);
       //todo: remove script
       //$(script).remove()
-    delete window[callbackName]
-    ajaxSuccess(data, xhr, options)
+    try {
+      delete window[callbackName];
+    }catch(e){
+      window[callbackName] = undefined;
+    }
+    ajaxSuccess(data, xhr, options);
   }
 
-  serializeData(options)
-  script.src = options.url.replace(/=\?/, '=' + callbackName)
+  serializeData(options);
+  script.src = options.url.replace(/=\?/, '=' + callbackName);
 
   // Use insertBefore instead of appendChild to circumvent an IE6 bug.
   // This arises when a base node is used (see jQuery bugs #2709 and #4378).
   head.insertBefore(script, head.firstChild);
 
   if (options.timeout > 0) abortTimeout = setTimeout(function(){
-      xhr.abort()
-      ajaxComplete('timeout', xhr, options)
-    }, options.timeout)
+      xhr.abort();
+      ajaxComplete('timeout', xhr, options);
+    }, options.timeout);
 
-  return xhr
+  return xhr;
 }
 
 ajax.settings = {
@@ -3315,16 +3323,16 @@ module.exports = function(val){
         Conekta._helpers.beacon_sent = true;
         if (antifraud_config['siftscience']) {
           _user_id = session_id;
-          window._sift2 = window._sift2 || [];
-          _sift2.push(["_setAccount", antifraud_config['siftscience']['beacon_key']]);
-          _sift2.push(["_setSessionId", session_id]);
-          _sift2.push(["_trackPageview"]);
+          window._sift = window._sift || [];
+          _sift.push(["_setAccount", antifraud_config['siftscience']['beacon_key']]);
+          _sift.push(["_setSessionId", session_id]);
+          _sift.push(["_trackPageview"]);
           ls = function() {
             var e, s;
             e = document.createElement("script");
             e.type = "text/javascript";
             e.async = true;
-            e.src = "https://s3.amazonaws.com/conektaapi/v1.0.0/js/s.js";
+            e.src = ('https:' === document.location.protocol ? 'https://' : 'http://') + 'cdn.siftscience.com/s.js';
             s = document.getElementsByTagName("script")[0];
             s.parentNode.insertBefore(e, s);
           };
@@ -3372,7 +3380,7 @@ module.exports = function(val){
       return antifraud_config = JSON.parse(unparsed_antifraud_config);
     } else {
       success_callback = function(config) {
-        antifraud_config = JSON.parse(config);
+        antifraud_config = config;
         localstorageSet('conekta_antifraud_config', antifraud_config);
         return send_beacon();
       };

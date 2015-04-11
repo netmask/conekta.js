@@ -58,24 +58,24 @@ send_beacon = ->
         #siftscience
         _user_id = session_id
 
-        window._sift2 = window._sift2 or []
+        window._sift = window._sift or []
 
-        _sift2.push [
+        _sift.push [
           "_setAccount"
           antifraud_config['siftscience']['beacon_key']
         ]
 
-        _sift2.push [
+        _sift.push [
           "_setSessionId"
           session_id
         ]
-        _sift2.push ["_trackPageview"]
+        _sift.push ["_trackPageview"]
 
         ls = ->
           e = document.createElement("script")
           e.type = "text/javascript"
           e.async = true
-          e.src = "https://s3.amazonaws.com/conektaapi/v1.0.0/js/s.js"
+          e.src = (if 'https:' == document.location.protocol then 'https://' else 'http://') + 'cdn.siftscience.com/s.js'
           s = document.getElementsByTagName("script")[0]
           s.parentNode.insertBefore e, s
           return
@@ -117,7 +117,7 @@ getAntifraudConfig = ()->
     antifraud_config = JSON.parse(unparsed_antifraud_config)
   else
     success_callback = (config)->
-      antifraud_config = JSON.parse(config)
+      antifraud_config = config
       localstorageSet('conekta_antifraud_config', antifraud_config)
       send_beacon()
 
