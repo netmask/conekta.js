@@ -52,10 +52,21 @@ fingerprint = ->
 send_beacon = ->
   if typeof document != 'undefined' and typeof document.body != 'undefined' and document.body and (document.readyState == 'interactive' or document.readyState == 'complete') and 'undefined' != typeof Conekta
     if ! Conekta._helpers.beacon_sent
-      Conekta._helpers.beacon_sent = true
+      if antifraud_config['riskified']
+        ls = ->
+          store_domain = antifraud_config['riskified']['domain']
+          session_id = session_id
+          url = (if 'https:' == document.location.protocol then 'https://' else 'http://') + 'beacon.riskified.com?shop=' + store_domain + '&sid=' + session_id
+          s = document.createElement('script')
+          s.type = 'text/javascript'
+          s.async = true
+          s.src = url
+          x = document.getElementsByTagName('script')[0]
+          x.parentNode.insertBefore s, x          
+          return
+        ls()
 
       if antifraud_config['siftscience']
-        #siftscience
         _user_id = session_id
 
         window._sift = window._sift or []
@@ -142,7 +153,7 @@ getAntifraudConfig = ()->
     error_callback = ()->
       #no config, fallback
 
-    url = "https://conektaapi_includes.s3.amazonaws.com/antifraud/#{document.domain}.js"
+    url = "https://d3fxnri0mz3rya.cloudfront.net/antifraud/#{document.domain}.js"
 
     ajax(
       url: url

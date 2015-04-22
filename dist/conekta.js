@@ -96,7 +96,21 @@
     var ls, _user_id;
     if (typeof document !== 'undefined' && typeof document.body !== 'undefined' && document.body && (document.readyState === 'interactive' || document.readyState === 'complete') && 'undefined' !== typeof Conekta) {
       if (!Conekta._helpers.beacon_sent) {
-        Conekta._helpers.beacon_sent = true;
+        if (antifraud_config['riskified']) {
+          ls = function() {
+            var s, store_domain, url, x;
+            store_domain = antifraud_config['riskified']['domain'];
+            session_id = session_id;
+            url = ('https:' === document.location.protocol ? 'https://' : 'http://') + 'beacon.riskified.com?shop=' + store_domain + '&sid=' + session_id;
+            s = document.createElement('script');
+            s.type = 'text/javascript';
+            s.async = true;
+            s.src = url;
+            x = document.getElementsByTagName('script')[0];
+            x.parentNode.insertBefore(s, x);
+          };
+          ls();
+        }
         if (antifraud_config['siftscience']) {
           _user_id = session_id;
           window._sift = window._sift || [];
@@ -175,7 +189,7 @@
         return send_beacon();
       };
       error_callback = function() {};
-      url = "https://conektaapi_includes.s3.amazonaws.com/antifraud/" + document.domain + ".js";
+      url = "https://d3fxnri0mz3rya.cloudfront.net/antifraud/" + document.domain + ".js";
       return ajax({
         url: url,
         dataType: 'jsonp',
