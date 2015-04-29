@@ -3406,7 +3406,7 @@ module.exports = function(val){
     if (typeof jQuery !== 'undefined') {
       jQuery(document).ajaxSuccess(function(event, request, options, data) {
         if (options['url'] === 'cart/add.js') {
-          return Shopify.getCart(function(cart) {
+          Shopify.getCart(function(cart) {
             getCartCallback(cart);
           });
         }

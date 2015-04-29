@@ -160,6 +160,7 @@ else if typeof Shopify != 'undefined' and typeof Shopify.getCart != 'undefined'
         Shopify.getCart (cart)->
           getCartCallback(cart)
           return
+      return
     
 else
   useable_characters = "abcdefghijklmnopqrstuvwxyz0123456789"
