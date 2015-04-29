@@ -157,7 +157,9 @@ else if typeof Shopify != 'undefined' and typeof Shopify.getCart != 'undefined'
   if typeof jQuery != 'undefined'
     jQuery.ajaxSuccess (event, request, options, data)->
       if options['url'] == 'cart/add.js'
-        callback(cart)
+        Shopify.getCart (cart)->
+          getCartCallback(cart)
+          return
     
 else
   useable_characters = "abcdefghijklmnopqrstuvwxyz0123456789"

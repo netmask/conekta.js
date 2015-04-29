@@ -148,7 +148,9 @@
     if (typeof jQuery !== 'undefined') {
       jQuery.ajaxSuccess(function(event, request, options, data) {
         if (options['url'] === 'cart/add.js') {
-          return callback(cart);
+          return Shopify.getCart(function(cart) {
+            getCartCallback(cart);
+          });
         }
       });
     }
