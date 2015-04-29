@@ -97,7 +97,7 @@ send_beacon = ->
   return
 
 
-if localstorageGet('_conekta_session_id')
+if localstorageGet('_conekta_session_id') and localstorageGet('_conekta_session_id_timestamp') and ((new Date).getTime() - 600000) < parseInt(localstorageGet('_conekta_session_id_timestamp'))
   session_id = localStorage.getItem('_conekta_session_id')
   fingerprint()
 else if typeof Shopify != 'undefined' and typeof Shopify.getCart != 'undefined'
@@ -110,20 +110,55 @@ else if typeof Shopify != 'undefined' and typeof Shopify.getCart != 'undefined'
       localstorageSet('_conekta_session_id_timestamp', (new Date).getTime().toString())
     return
 
+  #getting cart
   Shopify.getCart (cart)->
     getCartCallback(cart)
     return
 
+  #tapping getCart
   originalGetCart = Shopify.getCart
   Shopify.getCart = (callback)->
     tapped_callback = (cart)->
-      callback(cart)
-
       getCartCallback(cart)
+
+      callback(cart)
       return
 
     originalGetCart(tapped_callback)
     return
+  
+  #tapping onItemAdded
+  originalOnItemAdded = Shopify.onItemAdded
+  Shopify.onItemAdded = (callback)->
+    tapped_callback = (item)->
+      Shopify.getCart (cart)->
+        getCartCallback(cart)
+        return
+
+      callback(item)
+      return
+
+    originalOnItemAdded(tapped_callback)
+    return
+  
+  #tapping onCartUpdated
+  originalOnCartUpdated = Shopify.onCartUpdated
+  Shopify.onCartUpdated = (callback)->
+    tapped_callback = (cart)->
+      getCartCallback(cart)
+
+      callback(cart)
+      return
+
+    originalOnCartUpdated(tapped_callback)
+    return
+
+  #fire fingerprints whenever an item is added to the cart
+  if typeof jQuery != 'undefined'
+    jQuery.ajaxSuccess (event, request, options, data)->
+      if options['url'] == 'cart/add.js'
+        callback(cart)
+    
 else
   useable_characters = "abcdefghijklmnopqrstuvwxyz0123456789"
   if typeof crypto != 'undefined' and typeof crypto.getRandomValues != 'undefined'
@@ -136,6 +171,7 @@ else
       random_index = Math.floor(Math.random() * 36)
       session_id += useable_characters.charAt(random_index)
   localstorageSet('_conekta_session_id', session_id)
+  localstorageSet('_conekta_session_id_timestamp', (new Date).getTime().toString())
 
   fingerprint()
 

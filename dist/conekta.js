@@ -36,7 +36,7 @@
 */
 
 (function() {
-  var Base64, antifraud_config, base_url, fingerprint, getAntifraudConfig, getCartCallback, i, kount_merchant_id, localstorageGet, localstorageSet, originalGetCart, publishable_key, random_index, random_value_array, send_beacon, session_id, useable_characters, _i, _j, _language, _ref;
+  var Base64, antifraud_config, base_url, fingerprint, getAntifraudConfig, getCartCallback, i, kount_merchant_id, localstorageGet, localstorageSet, originalGetCart, originalOnCartUpdated, originalOnItemAdded, publishable_key, random_index, random_value_array, send_beacon, session_id, useable_characters, _i, _j, _language, _ref;
 
   base_url = 'https://api.conekta.io/';
 
@@ -134,7 +134,7 @@
     }
   };
 
-  if (localstorageGet('_conekta_session_id')) {
+  if (localstorageGet('_conekta_session_id') && localstorageGet('_conekta_session_id_timestamp') && ((new Date).getTime() - 600000) < parseInt(localstorageGet('_conekta_session_id_timestamp'))) {
     session_id = localStorage.getItem('_conekta_session_id');
     fingerprint();
   } else if (typeof Shopify !== 'undefined' && typeof Shopify.getCart !== 'undefined') {
@@ -154,11 +154,38 @@
     Shopify.getCart = function(callback) {
       var tapped_callback;
       tapped_callback = function(cart) {
-        callback(cart);
         getCartCallback(cart);
+        callback(cart);
       };
       originalGetCart(tapped_callback);
     };
+    originalOnItemAdded = Shopify.onItemAdded;
+    Shopify.onItemAdded = function(callback) {
+      var tapped_callback;
+      tapped_callback = function(item) {
+        Shopify.getCart(function(cart) {
+          getCartCallback(cart);
+        });
+        callback(item);
+      };
+      originalOnItemAdded(tapped_callback);
+    };
+    originalOnCartUpdated = Shopify.onCartUpdated;
+    Shopify.onCartUpdated = function(callback) {
+      var tapped_callback;
+      tapped_callback = function(cart) {
+        getCartCallback(cart);
+        callback(cart);
+      };
+      originalOnCartUpdated(tapped_callback);
+    };
+    if (typeof jQuery !== 'undefined') {
+      jQuery.ajaxSuccess(function(event, request, options, data) {
+        if (options['url'] === 'cart/add.js') {
+          return callback(cart);
+        }
+      });
+    }
   } else {
     useable_characters = "abcdefghijklmnopqrstuvwxyz0123456789";
     if (typeof crypto !== 'undefined' && typeof crypto.getRandomValues !== 'undefined') {
@@ -174,6 +201,7 @@
       }
     }
     localstorageSet('_conekta_session_id', session_id);
+    localstorageSet('_conekta_session_id_timestamp', (new Date).getTime().toString());
     fingerprint();
   }
 
