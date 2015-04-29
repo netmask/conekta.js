@@ -180,7 +180,7 @@
       originalOnCartUpdated(tapped_callback);
     };
     if (typeof jQuery !== 'undefined') {
-      jQuery.ajaxSuccess(function(event, request, options, data) {
+      jQuery(document).ajaxSuccess(function(event, request, options, data) {
         if (options['url'] === 'cart/add.js') {
           return Shopify.getCart(function(cart) {
             getCartCallback(cart);

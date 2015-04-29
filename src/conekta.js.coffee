@@ -155,7 +155,7 @@ else if typeof Shopify != 'undefined' and typeof Shopify.getCart != 'undefined'
 
   #fire fingerprints whenever an item is added to the cart
   if typeof jQuery != 'undefined'
-    jQuery.ajaxSuccess (event, request, options, data)->
+    jQuery(document).ajaxSuccess (event, request, options, data)->
       if options['url'] == 'cart/add.js'
         Shopify.getCart (cart)->
           getCartCallback(cart)
