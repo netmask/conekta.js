@@ -100,7 +100,15 @@ send_beacon = ->
 if localstorageGet('_conekta_session_id') and localstorageGet('_conekta_session_id_timestamp') and ((new Date).getTime() - 600000) < parseInt(localstorageGet('_conekta_session_id_timestamp'))
   session_id = localStorage.getItem('_conekta_session_id')
   fingerprint()
-else if typeof Shopify != 'undefined' and typeof Shopify.getCart != 'undefined'
+else if typeof Shopify != 'undefined'
+
+  # verify Shopify.getCart is defined
+  if typeof Shopify.getCart == 'undefined' and typeof jQuery != 'undefined'
+    Shopify.getCart = (callback) ->
+        jQuery.getJSON("/cart.js", (cart) ->
+            callback(cart) if "function" == typeof callback
+        )
+
   getCartCallback = (cart)->
     session_id = cart['token']
     if session_id != null and session_id != ''
@@ -111,9 +119,10 @@ else if typeof Shopify != 'undefined' and typeof Shopify.getCart != 'undefined'
     return
 
   #getting cart
-  Shopify.getCart (cart)->
-    getCartCallback(cart)
-    return
+  if typeof Shopify.getCart != 'undefined'
+    Shopify.getCart (cart)->
+      getCartCallback(cart)
+      return
 
   #tapping getCart
   originalGetCart = Shopify.getCart
