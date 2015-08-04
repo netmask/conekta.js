@@ -6,13 +6,25 @@ antifraud_config = {}
 
 localstorageGet = (key)->
   if typeof localStorage != 'undefined' and typeof localStorage.getItem != 'undefined' 
-    return localStorage.getItem(key)
+    try 
+      localStorage.setItem('testKey', '1')
+      localStorage.removeItem('testKey')
+      return localStorage.getItem(key)
+    catch error
+      return null
   else
     null
 
 localstorageSet = (key, value)->
   if typeof localStorage != 'undefined' and typeof localStorage.setItem != 'undefined' 
-    return localStorage.setItem(key, value)
+    try 
+      localStorage.setItem('testKey', '1')
+      localStorage.removeItem('testKey')
+      return localStorage.setItem(key, value)
+    catch error
+      return null
+  else
+    return null
 
 publishable_key = localstorageGet('_conekta_publishable_key')
 
