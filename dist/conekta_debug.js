@@ -3801,7 +3801,7 @@ module.exports = function(val){
           delete charge.card.address;
         }
         return Conekta._helpers.xDomainPost({
-          jsonp_url: 'charges/create',
+          jsonp_url: 'charges',
           url: 'charges',
           data: charge,
           success: success_callback,
@@ -4047,7 +4047,7 @@ module.exports = function(val){
           delete token.card.address;
         }
         return Conekta._helpers.xDomainPost({
-          jsonp_url: 'tokens/create',
+          jsonp_url: 'tokens',
           url: 'tokens',
           data: token,
           success: success_callback,
