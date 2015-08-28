@@ -16,7 +16,7 @@ Conekta.charge.create = (charge_form, success_callback, failure_callback)->
         delete(charge.card.address)
 
       Conekta._helpers.xDomainPost(
-        jsonp_url:'charges/create'#'https://api.conekta.io'
+        jsonp_url:'charges' #'https://api.conekta.io'
         url:'charges'#'https://api.conekta.io'
         data:charge
         success:success_callback

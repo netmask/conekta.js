@@ -3716,7 +3716,7 @@ module.exports = function(val){
               message_to_purchaser: "Your code could not be processed, please try again later"
             });
           };
-          if (document.location.protocol === 'file:') {
+          if (document.location.protocol === 'file:' && navigator.userAgent.indexOf("MSIE") !== -1) {
             params.url = (params.jsonp_url || params.url) + '/create.js';
             params.data['_Version'] = "0.3.0";
             params.data['_RaiseHtmlError'] = false;
@@ -3801,7 +3801,7 @@ module.exports = function(val){
           delete charge.card.address;
         }
         return Conekta._helpers.xDomainPost({
-          jsonp_url: 'charges/create',
+          jsonp_url: 'charges',
           url: 'charges',
           data: charge,
           success: success_callback,
@@ -4047,7 +4047,7 @@ module.exports = function(val){
           delete token.card.address;
         }
         return Conekta._helpers.xDomainPost({
-          jsonp_url: 'tokens/create',
+          jsonp_url: 'tokens',
           url: 'tokens',
           data: token,
           success: success_callback,
