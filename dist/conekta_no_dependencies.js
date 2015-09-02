@@ -15,16 +15,34 @@
   antifraud_config = {};
 
   localstorageGet = function(key) {
+    var error;
     if (typeof localStorage !== 'undefined' && typeof localStorage.getItem !== 'undefined') {
-      return localStorage.getItem(key);
+      try {
+        localStorage.setItem('testKey', '1');
+        localStorage.removeItem('testKey');
+        return localStorage.getItem(key);
+      } catch (_error) {
+        error = _error;
+        return null;
+      }
     } else {
       return null;
     }
   };
 
   localstorageSet = function(key, value) {
+    var error;
     if (typeof localStorage !== 'undefined' && typeof localStorage.setItem !== 'undefined') {
-      return localStorage.setItem(key, value);
+      try {
+        localStorage.setItem('testKey', '1');
+        localStorage.removeItem('testKey');
+        return localStorage.setItem(key, value);
+      } catch (_error) {
+        error = _error;
+        return null;
+      }
+    } else {
+      return null;
     }
   };
 
@@ -440,7 +458,7 @@
               message_to_purchaser: "Your code could not be processed, please try again later"
             });
           };
-          if (document.location.protocol === 'file:') {
+          if (document.location.protocol === 'file:' && navigator.userAgent.indexOf("MSIE") !== -1) {
             params.url = (params.jsonp_url || params.url) + '/create.js';
             params.data['_Version'] = "0.3.0";
             params.data['_RaiseHtmlError'] = false;
@@ -525,7 +543,7 @@
           delete charge.card.address;
         }
         return Conekta._helpers.xDomainPost({
-          jsonp_url: 'charges/create',
+          jsonp_url: 'charges',
           url: 'charges',
           data: charge,
           success: success_callback,
@@ -771,7 +789,7 @@
           delete token.card.address;
         }
         return Conekta._helpers.xDomainPost({
-          jsonp_url: 'tokens/create',
+          jsonp_url: 'tokens',
           url: 'tokens',
           data: token,
           success: success_callback,
