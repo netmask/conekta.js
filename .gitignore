@@ -17,3 +17,4 @@
 *.swl
 *.swk
 *.swj
+**/.DS_Store
