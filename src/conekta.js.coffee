@@ -14,7 +14,7 @@ localstorageSet = (key, value)->
   if typeof localStorage != 'undefined' and typeof localStorage.setItem != 'undefined' 
     return localStorage.setItem(key, value)
 
-publishable_key = localstorageGet('_conekta_publishable_key')
+public_key = localstorageGet('_conekta_publishable_key')
 
 fingerprint = ->
   if typeof document != 'undefined' and typeof document.body != 'undefined' and document.body and (document.readyState == 'interactive' or document.readyState == 'complete') and 'undefined' != typeof Conekta
@@ -313,24 +313,26 @@ Base64 =
         i += 3
     string
 
-if ! window.Conekta
-  window.Conekta = 
+if !window.Conekta
+
+  window.Conekta =
+
     setLanguage: (language)->
       _language = language
 
     getLanguage: ()->
       _language
 
-    setPublishableKey: (key)->
+    setPublicKey: (key) ->
       if typeof key == 'string' and key.match(/^[a-zA-Z0-9_]*$/) and key.length >= 20 and key.length < 30
-        publishable_key = key
-        localstorageSet('_conekta_publishable_key', publishable_key)
+        public_key = key
+        localstorageSet('_conekta_publishable_key', public_key)
       else
         Conekta._helpers.log('Unusable public key: ' + key)
       return
 
-    getPublishableKey: ()->
-      publishable_key
+    getPublicKey: (key) ->
+      public_key
 
     _helpers:
       finger_printed: false
@@ -427,7 +429,7 @@ if ! window.Conekta
           params.url = (params.jsonp_url || params.url) + '/create.js'
           params.data['_Version'] = "0.3.0"
           params.data['_RaiseHtmlError'] = false
-          params.data['auth_token'] = Conekta.getPublishableKey()
+          params.data['auth_token'] = Conekta.getPublicKey()
           params.data['conekta_client_user_agent'] = '{"agent":"Conekta JavascriptBindings/0.3.0"}'
 
           ajax(
@@ -450,7 +452,7 @@ if ! window.Conekta
                 'Accept': 'application/vnd.conekta-v0.3.0+json'
                 'Accept-Language': Conekta.getLanguage()
                 'Conekta-Client-User-Agent':'{"agent":"Conekta JavascriptBindings/0.3.0"}'
-                'Authorization':'Basic ' + Base64.encode(Conekta.getPublishableKey() + ':')
+                'Authorization':'Basic ' + Base64.encode(Conekta.getPublicKey() + ':')
               success: success_callback
               error:error_callback
             )
@@ -471,10 +473,18 @@ if ! window.Conekta
                 'Accept': 'application/vnd.conekta-v0.3.0+json'
                 'Accept-Language': Conekta.getLanguage()
                 'Conekta-Client-User-Agent':'{"agent":"Conekta JavascriptBindings/0.3.0"}'
-                'Authorization':'Basic ' + Base64.encode(Conekta.getPublishableKey() + ':')
+                'Authorization':'Basic ' + Base64.encode(Conekta.getPublicKey() + ':')
               data:JSON.stringify(params.data)
             }, success_callback, error_callback)
 
       log: (data)->
         if typeof console != 'undefined' and console.log
           console.log(data)
+
+  if $('script[data-conekta-session-id]').size() > 0
+    $tag = $($('script[data-conekta-session-id]').get(0));
+    session_id = $tag.data('conekta-session-id')
+
+  if $('script[data-conekta-public-key]').size() > 0
+    $tag = $($('script[data-conekta-public-key]').get(0));
+    window.Conekta.setPublicKey($tag.data('conekta-public-key'));
