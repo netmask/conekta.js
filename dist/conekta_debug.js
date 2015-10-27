@@ -3612,20 +3612,20 @@ module.exports = function(val){
           }
           return keys;
         },
-        parseForm: function(charge_form) {
-          var all_inputs, attribute, attribute_name, attributes, charge, input, inputs, key, l, last_attribute, len, len1, line_items, m, node, o, parent_node, q, r, ref1, ref2, ref3, selects, textareas, val;
-          charge = {};
-          if (typeof charge_form === 'object') {
-            if (typeof jQuery !== 'undefined' && (charge_form instanceof jQuery || 'jquery' in Object(charge_form))) {
-              charge_form = charge_form.get()[0];
-              if (typeof charge_form !== 'object') {
+        parseForm: function(form_object) {
+          var all_inputs, attribute, attribute_name, attributes, input, inputs, json_object, l, last_attribute, len, len1, m, node, o, parent_node, q, r, ref1, ref2, ref3, selects, textareas, val;
+          json_object = {};
+          if (typeof form_object === 'object') {
+            if (typeof jQuery !== 'undefined' && (form_object instanceof jQuery || 'jquery' in Object(form_object))) {
+              form_object = form_object.get()[0];
+              if (typeof form_object !== 'object') {
                 return {};
               }
             }
-            if (charge_form.nodeType) {
-              textareas = charge_form.getElementsByTagName('textarea');
-              inputs = charge_form.getElementsByTagName('input');
-              selects = charge_form.getElementsByTagName('select');
+            if (form_object.nodeType) {
+              textareas = form_object.getElementsByTagName('textarea');
+              inputs = form_object.getElementsByTagName('input');
+              selects = form_object.getElementsByTagName('select');
               all_inputs = new Array(textareas.length + inputs.length + selects.length);
               for (i = l = 0, ref1 = textareas.length - 1; l <= ref1; i = l += 1) {
                 all_inputs[i] = textareas[i];
@@ -3648,7 +3648,7 @@ module.exports = function(val){
                     }
                     attributes = attribute_name.replace(/\]/g, '').replace(/\-/g, '_').split(/\[/);
                     parent_node = null;
-                    node = charge;
+                    node = json_object;
                     last_attribute = null;
                     for (r = 0, len1 = attributes.length; r < len1; r++) {
                       attribute = attributes[r];
@@ -3664,17 +3664,10 @@ module.exports = function(val){
                 }
               }
             } else {
-              charge = charge_form;
-            }
-            if (charge.details && charge.details.line_items && Object.prototype.toString.call(charge.details.line_items) !== '[object Array]' && typeof charge.details.line_items === 'object') {
-              line_items = [];
-              for (key in charge.details.line_items) {
-                line_items.push(charge.details.line_items[key]);
-              }
-              charge.details.line_items = line_items;
+              json_object = form_object;
             }
           }
-          return charge;
+          return json_object;
         },
         getSessionId: function() {
           return session_id;

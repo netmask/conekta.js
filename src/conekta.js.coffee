@@ -344,20 +344,19 @@ if !window.Conekta
             keys.push(p)
         return keys
 
-      parseForm:(charge_form)->
-        charge = {}
-        if typeof charge_form == 'object'
-          if typeof jQuery != 'undefined' and (charge_form instanceof jQuery or 'jquery' of Object(charge_form))
-            charge_form = charge_form.get()[0]
+      parseForm:(form_object)->
+        json_object = {}
+        if typeof form_object == 'object'
+          if typeof jQuery != 'undefined' and (form_object instanceof jQuery or 'jquery' of Object(form_object))
+            form_object = form_object.get()[0]
             #if jquery selector returned nothing
-            if typeof charge_form != 'object'
+            if typeof form_object != 'object'
               return {}
 
-
-          if charge_form.nodeType
-            textareas = charge_form.getElementsByTagName('textarea')
-            inputs = charge_form.getElementsByTagName('input')
-            selects = charge_form.getElementsByTagName('select')
+          if form_object.nodeType
+            textareas = form_object.getElementsByTagName('textarea')
+            inputs = form_object.getElementsByTagName('input')
+            selects = form_object.getElementsByTagName('select')
             all_inputs = new Array(textareas.length + inputs.length + selects.length)
 
             for i in [0..textareas.length-1] by 1
@@ -380,7 +379,7 @@ if !window.Conekta
                   attributes = attribute_name.replace(/\]/g, '').replace(/\-/g,'_').split(/\[/)
 
                   parent_node = null
-                  node = charge
+                  node = json_object
                   last_attribute = null
                   for attribute in attributes
                     if ! node[attribute]
@@ -392,15 +391,9 @@ if !window.Conekta
 
                   parent_node[last_attribute] = val
           else
-            charge = charge_form
+            json_object = form_object
 
-          if charge.details && charge.details.line_items && Object.prototype.toString.call( charge.details.line_items ) != '[object Array]' && typeof charge.details.line_items == 'object'
-            line_items = []
-            for key of charge.details.line_items
-              line_items.push(charge.details.line_items[key])
-            charge.details.line_items = line_items
-
-        charge
+        json_object
 
       getSessionId:()->
         session_id
