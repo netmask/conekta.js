@@ -3776,51 +3776,6 @@ module.exports = function(val){
 }).call(this);
 
 (function() {
-  Conekta.charge = {};
-
-  Conekta.charge.create = function(charge_form, success_callback, failure_callback) {
-    var charge;
-    if (typeof success_callback !== 'function') {
-      success_callback = Conekta._helpers.log;
-    }
-    if (typeof failure_callback !== 'function') {
-      failure_callback = Conekta._helpers.log;
-    }
-    charge = Conekta._helpers.parseForm(charge_form);
-    if (typeof charge === 'object') {
-      if (Conekta._helpers.objectKeys(charge).length > 0) {
-        charge.session_id = Conekta._helpers.getSessionId();
-        if (charge.card && charge.card.address && !(charge.card.address.street1 || charge.card.address.street2 || charge.card.address.street3 || charge.card.address.city || charge.card.address.state || charge.card.address.country || charge.card.address.zip)) {
-          delete charge.card.address;
-        }
-        return Conekta._helpers.xDomainPost({
-          jsonp_url: 'charges/create',
-          url: 'charges',
-          data: charge,
-          success: success_callback,
-          error: failure_callback
-        });
-      } else {
-        return failure_callback({
-          'object': 'error',
-          'type': 'invalid_request_error',
-          'message': "Supplied parameter 'charge' is usable object but has no values (e.g. amount, description) associated with it",
-          'message_to_purchaser': "The card could not be processed, please try again later"
-        });
-      }
-    } else {
-      return failure_callback({
-        'object': 'error',
-        'type': 'invalid_request_error',
-        'message': "Supplied parameter 'charge' is not a javascript object",
-        'message_to_purchaser': "The card could not be processed, please try again later"
-      });
-    }
-  };
-
-}).call(this);
-
-(function() {
   var accepted_cards, card_types, get_card_type, is_valid_length, is_valid_luhn, parseMonth, parseYear,
     indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
