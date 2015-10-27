@@ -1,8 +1,11 @@
-/*conekta.js v1.0.0 | 2013- Conekta | https://github.com/conekta/conekta.js/blob/master/LICENSE-MIT.txt
-*/
+/* 
+ * conekta.js v1.0.0
+ * Conekta 2013
+ * https://github.com/conekta/conekta.js/blob/master/LICENSE.txt
+ */
 
 (function() {
-  var Base64, antifraud_config, base_url, fingerprint, getAntifraudConfig, getCartCallback, i, kount_merchant_id, localstorageGet, localstorageSet, originalGetCart, originalOnCartUpdated, originalOnItemAdded, publishable_key, random_index, random_value_array, send_beacon, session_id, useable_characters, _i, _j, _language, _ref;
+  var $tag, Base64, _language, antifraud_config, base_url, fingerprint, getAntifraudConfig, getCartCallback, i, j, k, kount_merchant_id, localstorageGet, localstorageSet, originalGetCart, originalOnCartUpdated, originalOnItemAdded, public_key, random_index, random_value_array, ref, send_beacon, session_id, useable_characters;
 
   base_url = 'https://api.conekta.io/';
 
@@ -28,7 +31,7 @@
     }
   };
 
-  publishable_key = localstorageGet('_conekta_publishable_key');
+  public_key = localstorageGet('_conekta_publishable_key');
 
   fingerprint = function() {
     var body, e, iframe, image;
@@ -41,11 +44,11 @@
         iframe.setAttribute("scrolling", "no");
         iframe.setAttribute("frameborder", "0");
         iframe.setAttribute("width", "1");
-        iframe.setAttribute("src", "" + base_url + "fraud_providers/kount/logo.htm?m=" + kount_merchant_id + "&s=" + session_id);
+        iframe.setAttribute("src", base_url + "fraud_providers/kount/logo.htm?m=" + kount_merchant_id + "&s=" + session_id);
         image = document.createElement('img');
         image.setAttribute("height", "1");
         image.setAttribute("width", "1");
-        image.setAttribute("src", "" + base_url + "fraud_providers/kount/logo.gif?m=" + kount_merchant_id + "&s=" + session_id);
+        image.setAttribute("src", base_url + "fraud_providers/kount/logo.gif?m=" + kount_merchant_id + "&s=" + session_id);
         try {
           iframe.appendChild(image);
         } catch (_error) {
@@ -59,7 +62,7 @@
   };
 
   send_beacon = function() {
-    var ls, _user_id;
+    var _user_id, ls;
     if (typeof document !== 'undefined' && typeof document.body !== 'undefined' && document.body && (document.readyState === 'interactive' || document.readyState === 'complete') && 'undefined' !== typeof Conekta) {
       if (!Conekta._helpers.beacon_sent) {
         if (antifraud_config['riskified']) {
@@ -170,11 +173,11 @@
     if (typeof crypto !== 'undefined' && typeof crypto.getRandomValues !== 'undefined') {
       random_value_array = new Uint32Array(32);
       crypto.getRandomValues(random_value_array);
-      for (i = _i = 0, _ref = random_value_array.length - 1; 0 <= _ref ? _i <= _ref : _i >= _ref; i = 0 <= _ref ? ++_i : --_i) {
+      for (i = j = 0, ref = random_value_array.length - 1; 0 <= ref ? j <= ref : j >= ref; i = 0 <= ref ? ++j : --j) {
         session_id += useable_characters.charAt(random_value_array[i] % 36);
       }
     } else {
-      for (i = _j = 0; _j <= 30; i = ++_j) {
+      for (i = k = 0; k <= 30; i = ++k) {
         random_index = Math.floor(Math.random() * 36);
         session_id += useable_characters.charAt(random_index);
       }
@@ -327,16 +330,16 @@
       getLanguage: function() {
         return _language;
       },
-      setPublishableKey: function(key) {
+      setPublicKey: function(key) {
         if (typeof key === 'string' && key.match(/^[a-zA-Z0-9_]*$/) && key.length >= 20 && key.length < 30) {
-          publishable_key = key;
-          localstorageSet('_conekta_publishable_key', publishable_key);
+          public_key = key;
+          localstorageSet('_conekta_publishable_key', public_key);
         } else {
           Conekta._helpers.log('Unusable public key: ' + key);
         }
       },
-      getPublishableKey: function() {
-        return publishable_key;
+      getPublicKey: function(key) {
+        return public_key;
       },
       _helpers: {
         finger_printed: false,
@@ -352,7 +355,7 @@
           return keys;
         },
         parseForm: function(charge_form) {
-          var all_inputs, attribute, attribute_name, attributes, charge, input, inputs, key, last_attribute, line_items, node, parent_node, selects, textareas, val, _k, _l, _len, _len1, _m, _n, _o, _ref1, _ref2, _ref3;
+          var all_inputs, attribute, attribute_name, attributes, charge, input, inputs, key, l, last_attribute, len, len1, line_items, m, node, o, parent_node, q, r, ref1, ref2, ref3, selects, textareas, val;
           charge = {};
           if (typeof charge_form === 'object') {
             if (typeof jQuery !== 'undefined' && (charge_form instanceof jQuery || 'jquery' in Object(charge_form))) {
@@ -366,17 +369,17 @@
               inputs = charge_form.getElementsByTagName('input');
               selects = charge_form.getElementsByTagName('select');
               all_inputs = new Array(textareas.length + inputs.length + selects.length);
-              for (i = _k = 0, _ref1 = textareas.length - 1; _k <= _ref1; i = _k += 1) {
+              for (i = l = 0, ref1 = textareas.length - 1; l <= ref1; i = l += 1) {
                 all_inputs[i] = textareas[i];
               }
-              for (i = _l = 0, _ref2 = inputs.length - 1; _l <= _ref2; i = _l += 1) {
+              for (i = m = 0, ref2 = inputs.length - 1; m <= ref2; i = m += 1) {
                 all_inputs[i + textareas.length] = inputs[i];
               }
-              for (i = _m = 0, _ref3 = selects.length - 1; _m <= _ref3; i = _m += 1) {
+              for (i = o = 0, ref3 = selects.length - 1; o <= ref3; i = o += 1) {
                 all_inputs[i + textareas.length + inputs.length] = selects[i];
               }
-              for (_n = 0, _len = all_inputs.length; _n < _len; _n++) {
-                input = all_inputs[_n];
+              for (q = 0, len = all_inputs.length; q < len; q++) {
+                input = all_inputs[q];
                 if (input) {
                   attribute_name = input.getAttribute('data-conekta');
                   if (attribute_name) {
@@ -389,8 +392,8 @@
                     parent_node = null;
                     node = charge;
                     last_attribute = null;
-                    for (_o = 0, _len1 = attributes.length; _o < _len1; _o++) {
-                      attribute = attributes[_o];
+                    for (r = 0, len1 = attributes.length; r < len1; r++) {
+                      attribute = attributes[r];
                       if (!node[attribute]) {
                         node[attribute] = {};
                       }
@@ -444,7 +447,7 @@
             params.url = (params.jsonp_url || params.url) + '/create.js';
             params.data['_Version'] = "0.3.0";
             params.data['_RaiseHtmlError'] = false;
-            params.data['auth_token'] = Conekta.getPublishableKey();
+            params.data['auth_token'] = Conekta.getPublicKey();
             params.data['conekta_client_user_agent'] = '{"agent":"Conekta JavascriptBindings/0.3.0"}';
             return ajax({
               url: base_url + params.url,
@@ -466,7 +469,7 @@
                   'Accept': 'application/vnd.conekta-v0.3.0+json',
                   'Accept-Language': Conekta.getLanguage(),
                   'Conekta-Client-User-Agent': '{"agent":"Conekta JavascriptBindings/0.3.0"}',
-                  'Authorization': 'Basic ' + Base64.encode(Conekta.getPublishableKey() + ':')
+                  'Authorization': 'Basic ' + Base64.encode(Conekta.getPublicKey() + ':')
                 },
                 success: success_callback,
                 error: error_callback
@@ -488,7 +491,7 @@
                   'Accept': 'application/vnd.conekta-v0.3.0+json',
                   'Accept-Language': Conekta.getLanguage(),
                   'Conekta-Client-User-Agent': '{"agent":"Conekta JavascriptBindings/0.3.0"}',
-                  'Authorization': 'Basic ' + Base64.encode(Conekta.getPublishableKey() + ':')
+                  'Authorization': 'Basic ' + Base64.encode(Conekta.getPublicKey() + ':')
                 },
                 data: JSON.stringify(params.data)
               }, success_callback, error_callback);
@@ -502,6 +505,14 @@
         }
       }
     };
+    if ($('script[data-conekta-session-id]').size() > 0) {
+      $tag = $($('script[data-conekta-session-id]').get(0));
+      session_id = $tag.data('conekta-session-id');
+    }
+    if ($('script[data-conekta-public-key]').size() > 0) {
+      $tag = $($('script[data-conekta-public-key]').get(0));
+      window.Conekta.setPublicKey($tag.data('conekta-public-key'));
+    }
   }
 
 }).call(this);
@@ -553,7 +564,7 @@
 
 (function() {
   var accepted_cards, card_types, get_card_type, is_valid_length, is_valid_luhn, parseMonth, parseYear,
-    __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
+    indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
   card_types = [
     {
@@ -600,11 +611,11 @@
   ];
 
   is_valid_luhn = function(number) {
-    var digit, n, sum, _i, _len, _ref;
+    var digit, i, len, n, ref, sum;
     sum = 0;
-    _ref = number.split('').reverse();
-    for (n = _i = 0, _len = _ref.length; _i < _len; n = ++_i) {
-      digit = _ref[n];
+    ref = number.split('').reverse();
+    for (n = i = 0, len = ref.length; i < len; n = ++i) {
+      digit = ref[n];
       digit = +digit;
       if (n % 2) {
         digit *= 2;
@@ -621,27 +632,27 @@
   };
 
   is_valid_length = function(number, card_type) {
-    var _ref;
-    return _ref = number.length, __indexOf.call(card_type.valid_length, _ref) >= 0;
+    var ref;
+    return ref = number.length, indexOf.call(card_type.valid_length, ref) >= 0;
   };
 
   accepted_cards = ['visa', 'mastercard', 'maestro', 'visa_electron', 'amex', 'laser', 'diners_club_carte_blanche', 'diners_club_international', 'discover', 'jcb'];
 
   get_card_type = function(number) {
-    var card, card_type, _i, _len, _ref;
-    _ref = (function() {
-      var _j, _len, _ref, _results;
-      _results = [];
-      for (_j = 0, _len = card_types.length; _j < _len; _j++) {
-        card = card_types[_j];
-        if (_ref = card.name, __indexOf.call(accepted_cards, _ref) >= 0) {
-          _results.push(card);
+    var card, card_type, i, len, ref;
+    ref = (function() {
+      var j, len, ref, results;
+      results = [];
+      for (j = 0, len = card_types.length; j < len; j++) {
+        card = card_types[j];
+        if (ref = card.name, indexOf.call(accepted_cards, ref) >= 0) {
+          results.push(card);
         }
       }
-      return _results;
+      return results;
     })();
-    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-      card_type = _ref[_i];
+    for (i = 0, len = ref.length; i < len; i++) {
+      card_type = ref[i];
       if (number.match(card_type.pattern)) {
         return card_type;
       }
@@ -744,9 +755,9 @@
 }).call(this);
 
 (function() {
-  Conekta.token = {};
+  Conekta.Token = {};
 
-  Conekta.token.create = function(token_form, success_callback, failure_callback) {
+  Conekta.Token.create = function(token_form, success_callback, failure_callback) {
     var token;
     if (typeof success_callback !== 'function') {
       success_callback = Conekta._helpers.log;
@@ -771,7 +782,7 @@
           delete token.card.address;
         }
         return Conekta._helpers.xDomainPost({
-          jsonp_url: 'tokens/create',
+          jsonp_url: 'tokens',
           url: 'tokens',
           data: token,
           success: success_callback,
