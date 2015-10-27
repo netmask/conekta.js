@@ -10,18 +10,19 @@ Before you get started, you will need to create an account on https://admin.cone
 
 To start processing credit cards do this:
 ```js
-Conekta.charge.new({
-  amount:10000,
-  currency:'MXN',
-  description:'Double-black belt'
-  card:{
-    name:'Bruce Lee',
-    number:'4111111111111111',
-    exp_year:'12',
-    exp_month:'04',
-    cvv:'123',
-  }
-},
+Conekta.charge.create(
+  {
+    amount:10000,
+    currency:'MXN',
+    description:'Double-black belt'
+    card:{
+      name:'Bruce Lee',
+      number:'4111111111111111',
+      exp_year:'12',
+      exp_month:'04',
+      cvv:'123',
+    }
+  },
   function(charge){
     alert('Success!');
   },
@@ -33,7 +34,7 @@ Conekta.charge.new({
 
 For oxxo:
 ```js
-Conekta.charge.new(
+Conekta.charge.create(
   {
     amount:10000,
     currency:'MXN',
@@ -53,7 +54,7 @@ Conekta.charge.new(
 
 For bank_transfers:
 ```js
-Conekta.charge.new(
+Conekta.charge.create(
   {
     amount:10000,
     currency:'MXN',
