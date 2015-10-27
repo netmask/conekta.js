@@ -10,7 +10,6 @@
   <!-- Incluir Conekta.js -->
   <script 
     type="text/javascript"
-    data-conekta-session-id="1234567890123456"
     data-conekta-public-key="key_KJysdbf6PotS2ut2"
     src="../dist/conekta.js"></script>
  
@@ -18,7 +17,7 @@
 
     jQuery(function($) {
       var conektaSuccessResponseHandler = function(token) {
-        console.log(token);
+        
         var $form = $('#payment-form');
 
         var card_token = token.id;
@@ -27,8 +26,7 @@
         $form.append($('<input type="hidden" name="card_token" />').val(card_token));
 
         // Submit the form data to the server
-        $form.find('button').prop('disabled', false);
-        //$form.get(0).submit();
+        $form.get(0).submit();
       };
 
       var conektaErrorResponseHandler = function(response) {
