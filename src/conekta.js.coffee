@@ -6,13 +6,25 @@ antifraud_config = {}
 
 localstorageGet = (key)->
   if typeof localStorage != 'undefined' and typeof localStorage.getItem != 'undefined' 
-    return localStorage.getItem(key)
+    try 
+      localStorage.setItem('testKey', '1')
+      localStorage.removeItem('testKey')
+      return localStorage.getItem(key)
+    catch error
+      return null
   else
     null
 
 localstorageSet = (key, value)->
   if typeof localStorage != 'undefined' and typeof localStorage.setItem != 'undefined' 
-    return localStorage.setItem(key, value)
+    try 
+      localStorage.setItem('testKey', '1')
+      localStorage.removeItem('testKey')
+      return localStorage.setItem(key, value)
+    catch error
+      return null
+  else
+    return null
 
 public_key = localstorageGet('_conekta_publishable_key')
 
@@ -418,7 +430,7 @@ if !window.Conekta
             message_to_purchaser:"Your code could not be processed, please try again later"
           })
 
-        if document.location.protocol == 'file:'
+        if document.location.protocol == 'file:' and navigator.userAgent.indexOf("MSIE") != -1
           params.url = (params.jsonp_url || params.url) + '/create.js'
           params.data['_Version'] = "0.3.0"
           params.data['_RaiseHtmlError'] = false

@@ -26,7 +26,7 @@ Conekta.Token.create = (token_form, success_callback, failure_callback)->
         delete(token.card.address)
 
       Conekta._helpers.xDomainPost(
-        jsonp_url:'tokens'#'https://api.conekta.io'
+        jsonp_url:'tokens' #'https://api.conekta.io'
         url:'tokens'#'https://api.conekta.io'
         data:token
         success:success_callback

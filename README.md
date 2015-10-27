@@ -68,7 +68,7 @@ Conekta.Token.create(data, successHandler, errorHandler);
 **Tokenize via form**
 
 ```html
-<form action="" method="POST" id="card-form">
+<form action="" method="post" id="card-form">
   <span class="card-errors"></span>
   <div class="form-row">
     <label>
