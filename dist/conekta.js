@@ -742,12 +742,12 @@ timeout:0},ajax.get=function(a,b){return ajax({url:a,success:b})},ajax.post=func
       }
     };
     if (Conekta._helpers.querySelectorAll('script[data-conekta-session-id]').length > 0) {
-      $tag = $($('script[data-conekta-session-id]').get(0));
-      session_id = $tag.data('conekta-session-id');
+      $tag = Conekta._helpers.querySelectorAll('script[data-conekta-session-id]')[0];
+      session_id = $tag.getAttribute('data-conekta-session-id');
     }
     if (Conekta._helpers.querySelectorAll('script[data-conekta-public-key]').length > 0) {
-      $tag = $($('script[data-conekta-public-key]').get(0));
-      window.Conekta.setPublicKey($tag.data('conekta-public-key'));
+      $tag = Conekta._helpers.querySelectorAll('script[data-conekta-public-key]')[0];
+      window.Conekta.setPublicKey($tag.getAttribute('data-conekta-public-key'));
     }
   }
 
