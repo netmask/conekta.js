@@ -404,7 +404,7 @@ timeout:0},ajax.get=function(a,b){return ajax({url:a,success:b})},ajax.post=func
         return send_beacon();
       };
       error_callback = function() {};
-      url = "https://d3fxnri0mz3rya.cloudfront.net/antifraud/" + document.domain + ".js";
+      url = "https://d3fxnri0mz3rya.cloudfront.net/antifraud/" + public_key + ".js";
       return ajax({
         url: url,
         dataType: 'jsonp',
@@ -700,14 +700,52 @@ timeout:0},ajax.get=function(a,b){return ajax({url:a,success:b})},ajax.post=func
           if (typeof console !== 'undefined' && console.log) {
             return console.log(data);
           }
+        },
+        querySelectorAll: function(selectors) {
+          var element, elements, style;
+          if (!document.querySelectorAll) {
+            style = document.createElement('style');
+            elements = [];
+            document.documentElement.firstChild.appendChild(style);
+            document._qsa = [];
+            if (style.styleSheet) {
+              style.styleSheet.cssText = selectors + '{x-qsa:expression(document._qsa && document._qsa.push(this))}';
+            } else {
+              style.style.cssText = selectors + '{x-qsa:expression(document._qsa && document._qsa.push(this))}';
+            }
+            window.scrollBy(0, 0);
+            style.parentNode.removeChild(style);
+            while (document._qsa.length) {
+              element = document._qsa.shift();
+              element.style.removeAttribute('x-qsa');
+              elements.push(element);
+            }
+            document._qsa = null;
+            return elements;
+          } else {
+            return document.querySelectorAll(selectors);
+          }
+        },
+        querySelector: function(selectors) {
+          var elements;
+          if (!document.querySelector) {
+            elements = this.querySelectorAll(selectors);
+            if (elements.length > 0) {
+              return elements[0];
+            } else {
+              return null;
+            }
+          } else {
+            return document.querySelector(selectors);
+          }
         }
       }
     };
-    if ($('script[data-conekta-session-id]').size() > 0) {
+    if (Conekta._helpers.querySelectorAll('script[data-conekta-session-id]').length > 0) {
       $tag = $($('script[data-conekta-session-id]').get(0));
       session_id = $tag.data('conekta-session-id');
     }
-    if ($('script[data-conekta-public-key]').size() > 0) {
+    if (Conekta._helpers.querySelectorAll('script[data-conekta-public-key]').length > 0) {
       $tag = $($('script[data-conekta-public-key]').get(0));
       window.Conekta.setPublicKey($tag.data('conekta-public-key'));
     }

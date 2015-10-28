@@ -213,7 +213,7 @@ getAntifraudConfig = ()->
     error_callback = ()->
       #no config, fallback
 
-    url = "https://d3fxnri0mz3rya.cloudfront.net/antifraud/#{document.domain}.js"
+    url = "https://d3fxnri0mz3rya.cloudfront.net/antifraud/#{public_key}.js"
 
     ajax(
       url: url
@@ -486,10 +486,43 @@ if !window.Conekta
         if typeof console != 'undefined' and console.log
           console.log(data)
 
-  if $('script[data-conekta-session-id]').size() > 0
+      querySelectorAll: (selectors)->
+        if !document.querySelectorAll
+          style = document.createElement('style')
+          elements = []
+
+          document.documentElement.firstChild.appendChild(style)
+          document._qsa = []
+          if style.styleSheet
+            style.styleSheet.cssText = selectors + '{x-qsa:expression(document._qsa && document._qsa.push(this))}'
+          else
+            style.style.cssText = selectors + '{x-qsa:expression(document._qsa && document._qsa.push(this))}'
+          window.scrollBy(0, 0)
+          style.parentNode.removeChild(style)
+
+          while document._qsa.length
+            element = document._qsa.shift()
+            element.style.removeAttribute('x-qsa')
+            elements.push(element)
+          document._qsa = null
+          elements
+        else
+          document.querySelectorAll(selectors)
+
+      querySelector: (selectors)->
+        if !document.querySelector
+          elements = this.querySelectorAll(selectors)
+          if elements.length > 0
+            elements[0]
+          else
+            null
+        else
+          document.querySelector(selectors)
+
+  if Conekta._helpers.querySelectorAll('script[data-conekta-session-id]').length > 0
     $tag = $($('script[data-conekta-session-id]').get(0));
     session_id = $tag.data('conekta-session-id')
 
-  if $('script[data-conekta-public-key]').size() > 0
+  if Conekta._helpers.querySelectorAll('script[data-conekta-public-key]').length > 0
     $tag = $($('script[data-conekta-public-key]').get(0));
     window.Conekta.setPublicKey($tag.data('conekta-public-key'));
