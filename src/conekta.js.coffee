@@ -4,6 +4,12 @@ _language = 'es'
 kount_merchant_id = '205000'
 antifraud_config = {}
 
+unless window.conektaAjax
+  if typeof jQuery != 'undefined'
+    window.conektaAjax = jQuery.ajax #fallback to jquery
+  else
+    console.error("no either a jQuery or ajax function provided")
+
 localstorageGet = (key)->
   if typeof localStorage != 'undefined' and typeof localStorage.getItem != 'undefined'
     try

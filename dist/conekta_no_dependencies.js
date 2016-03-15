@@ -17,6 +17,14 @@
 
   antifraud_config = {};
 
+  if (!window.conektaAjax) {
+    if (typeof jQuery !== 'undefined') {
+      window.conektaAjax = jQuery.ajax;
+    } else {
+      console.error("no either a jQuery or ajax function provided");
+    }
+  }
+
   localstorageGet = function(key) {
     var error;
     if (typeof localStorage !== 'undefined' && typeof localStorage.getItem !== 'undefined') {
@@ -218,7 +226,7 @@
       };
       error_callback = function() {};
       url = "https://d3fxnri0mz3rya.cloudfront.net/antifraud/" + public_key + ".js";
-      return ajax({
+      return conektaAjax({
         url: url,
         dataType: 'jsonp',
         jsonpCallback: 'conekta_antifraud_config_jsonp',
@@ -460,7 +468,7 @@
             params.data['_RaiseHtmlError'] = false;
             params.data['auth_token'] = Conekta.getPublicKey();
             params.data['conekta_client_user_agent'] = '{"agent":"Conekta JavascriptBindings/0.3.0"}';
-            return ajax({
+            return conektaAjax({
               url: base_url + params.url,
               dataType: 'jsonp',
               data: params.data,
@@ -469,7 +477,7 @@
             });
           } else {
             if (typeof (new XMLHttpRequest()).withCredentials !== 'undefined') {
-              return ajax({
+              return conektaAjax({
                 url: base_url + params.url,
                 type: 'POST',
                 dataType: 'json',
