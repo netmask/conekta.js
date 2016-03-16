@@ -18,7 +18,7 @@ module.exports = function(grunt) {
                 'node_modules/jasmine-jquery/lib/jasmine-jquery.js'
             ],
             '--web-security' : false,
-          specs: 'spec/*spec.js',
+          specs: 'spec/*.js',
           helpers: 'spec/helpers/*helper.{js,coffee}'
         }
     },

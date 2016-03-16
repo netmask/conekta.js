@@ -1,7 +1,7 @@
-describe("Conekta js", function() {
+describe("Conekta js without jquery", function() {
 
   beforeEach(function(){
-    loadFixtures("credit_card.html");
+    loadFixtures("credit_card_no_jquery.html");
     spyOn(XMLHttpRequest.prototype, 'open').and.callThrough();
     spyOn(XMLHttpRequest.prototype, 'send');
   });
